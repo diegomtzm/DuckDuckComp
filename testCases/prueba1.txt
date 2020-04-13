@@ -1,12 +1,7 @@
-%% Programa con todas las funcionalidades
-%% Programa valido 
+%% Programa sin declaracion de variables globales
+%% Programa valido
 
 Programa patito;
-var
-  int i, j, p;
-  int Arreglo[10], OtroArreglo[10];
-  float valor;
-  int Matriz[3][8], OtraMatriz[3][3];
 
 %% funcion para regresar el factorial
 funcion int fact (int j):

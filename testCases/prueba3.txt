@@ -1,0 +1,17 @@
+%% Programa con bloque de decision sin bloque de 'sino'
+%% Programa valido
+
+Programa patito;
+
+funcion int fact (int j):
+var int i;
+{ 
+  i = j + (p - j * 2 + j);
+  si ((j == 1)) entonces {
+    regresa(j);
+  } 
+}
+
+principal() {
+
+}

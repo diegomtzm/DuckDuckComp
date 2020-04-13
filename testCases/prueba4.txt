@@ -1,0 +1,13 @@
+%% Programa con un arreglo de 3 dimensiones
+%% Programa invalido
+
+Programa patito;
+var
+  int i, j, p;
+  int Arreglo[10], OtroArreglo[10];
+  float valor;
+  int Matriz[3][8][5], OtraMatriz[3][3];
+
+principal() {
+  
+}
