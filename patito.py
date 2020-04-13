@@ -1,6 +1,6 @@
 # Diego Martínez A01176489
 # Luis Gerardo Bravo A01282014
-# Implementación del lenguaje LittleDuck 2020
+# Proyecto DuckDuckComp
 
 from lark import Lark
 
