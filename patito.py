@@ -2,25 +2,27 @@
 # Luis Gerardo Bravo A01282014
 # Proyecto DuckDuckComp
 
-from lark import Lark
+from lark import Lark, Transformer
 
 ld_grammar = r"""
-	programa: start dec_var? func* PRINCIPAL "(" ")" bloque
+  programa: start dec_var? func* PRINCIPAL "(" ")" bloque
   start: PROGRAMA ID ";"
   dec_var: VAR dec_var2+
   dec_var2: tipo lista_ids ";"
   lista_ids: ID dim? dim? "," lista_ids
       | ID dim? dim?
-  dim: "[" INT "]"
-  tipo: "int"
-      | "float"
-      | "char"
+  dim: "[" NUMBER "]"
+  tipo: INT
+      | FLOAT
+      | CHAR
   func: FUNCION t dec_func dec_var* bloque
+  t: INT
+   | FLOAT
+   | CHAR
+   | VOID
   dec_func: ID "(" params ")" ":"
   params: tipo ID "," params
       | tipo ID
-  t: tipo
-      | "void"
   bloque: "{" estatuto* "}"
   estatuto: asignacion
       | llamada ";"
@@ -76,7 +78,11 @@ ld_grammar = r"""
 
   PROGRAMA: "Programa"
   PRINCIPAL: "principal"
-	VAR: "var"
+  VAR: "var"
+  INT: "int"
+  FLOAT: "float"
+  CHAR: "char"
+  VOID: "void"
   FUNCION: "funcion"
   REGRESA: "regresa"
   LEE: "lee"
@@ -89,28 +95,71 @@ ld_grammar = r"""
   DESDE: "desde"
   HASTA: "hasta"
   HACER: "hacer"
-	ID: WORD
+  ID: WORD
   COMMENT: "%%" /(.|\\n|\\r)+/
 
-	%import common.WORD
-	%import common.ESCAPED_STRING -> STRING
+  %import common.WORD
+  %import common.ESCAPED_STRING -> STRING
   %import common.NUMBER
-	%import common.INT
-	%import common.WS
-	%ignore WS
+  %import common.WS
+  %ignore WS
   %ignore COMMENT
 """
 
-little_duck_parser = Lark(ld_grammar, parser="lalr", start="programa")
+DirFunc = {'name' : 'type'}
+VarGlobal = {'name' : 'type'}
+CurrType = ''
+class Tables(Transformer):
+    def start(self, args):
+        if args[1] in DirFunc: 
+            print('Funcion ya existe')
+        else:
+            DirFunc[args[1]] = 'program'
+            # print(args[1], ":", DirFunc[args[1]])
+
+    def dec_var(self, args):
+        if 'VarTable' in DirFunc:
+            print('VarTable(Global) ya existe')
+        else:
+            DirFunc['Global'] = 'void'
+
+    def lista_ids(self, args):
+        if args[0] in VarGlobal:
+            print('Error, multiple declaracion de variables')
+        else:
+            VarGlobal[args[0]] = CurrType
+            # print(args[0], ":", VarGlobal[args[0]])
+
+    def tipo(self, args):
+        global CurrType
+        CurrType = args[0]
+    
+    def t(self, args):
+        global CurrType
+        CurrType = args[0]
+
+    def dec_func(self, args):
+        if args[0] in DirFunc:
+            print('Error, multiple declaracion de funciones')
+        else:
+            # ERROR: no esta agarrando el nuevo CurrType
+            # funcion inicia es int en lugar de void
+            DirFunc[args[0]] = CurrType
+            print(args[0], ":", DirFunc[args[0]])
+
+
+
+
+little_duck_parser = Lark(ld_grammar, parser="lalr", start="programa", transformer=Tables())
 parse = little_duck_parser.parse
 
-fValid = open("proyecto/program.txt", "r")
+fValid = open("program.txt", "r")
 validSentence = fValid.read()
 
 validTree = parse(validSentence)
 
-print("\nPROGRAMA\n")
-print("---------------------------------------\n")
-print(validTree)
-print("\n" )
-print(validTree.pretty())
+# print("\nPROGRAMA\n")
+# print("---------------------------------------\n")
+# print(validTree)
+# print("\n" )
+# print(validTree.pretty())
