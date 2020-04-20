@@ -12,9 +12,11 @@ currFunc = 'global'
 currType = ''
 
 class Tables(Transformer):
-    # def programa(self, args):
-    #     pprint(dirFunc)
-    #     return Tree('program', args)
+    # Imprime el directorio de funciones para hacer pruebas
+    def programa(self, args):
+        print("\nDirectorio de funciones:\n")
+        pprint(dirFunc)
+        return Tree('program', args)
 
     def start(self, args):
         global dirFunc

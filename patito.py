@@ -13,4 +13,5 @@ fValid = open("program.txt", "r")
 validSentence = fValid.read()
 validTree = parse(validSentence)
 
+print("\nPrograma:\n")
 print(validTree.pretty())
