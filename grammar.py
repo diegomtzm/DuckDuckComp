@@ -34,7 +34,9 @@ ld_grammar = r"""
       | decision
       | rep_cond
       | rep_no_cond
-  asignacion: variable "=" expresion ";"
+  asignacion: variable igual expresion fin_asignacion
+	fin_asignacion: ";"
+	igual: IGUAL
   variable : ID dimn? dimn?
   dimn: "[" expresion "]"
   llamada: ID "(" params2 ")"
@@ -53,15 +55,16 @@ ld_grammar = r"""
   rep_cond: MIENTRAS "(" expresion ")" HAZ bloque
   rep_no_cond: DESDE variable "=" expresion HASTA expresion HACER bloque
   expresion: termino op1?
-  op1: "+" expresion
-      | "-" expresion
+  op1: adicion expresion
+	adicion: ADICION
   termino: factor op2?
-  op2: "*" termino
-      | "/" termino
+  op2: producto termino
+	producto: PRODUCTO
   factor: variable op_mat?
-      | NUMBER
+      | number
       | llamada
       | "(" exp_logica_or ")"
+	number: NUMBER
   op_mat: "$"
       | "¡"
       | "?"
@@ -97,6 +100,9 @@ ld_grammar = r"""
   DESDE: "desde"
   HASTA: "hasta"
   HACER: "hacer"
+	ADICION: "+" | "-"
+	PRODUCTO: "*" | "/"
+	IGUAL: "="
   ID: WORD
   COMMENT: "%%" /(.|\\n|\\r)+/
 
