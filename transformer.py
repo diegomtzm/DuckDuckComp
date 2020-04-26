@@ -210,5 +210,14 @@ class Tables(Transformer):
                     quadCount += 1
                 else:
                     print("Error: Type mismatch")
-        return Tree('fin_asignacion', args) 
+        return Tree('fin_asignacion', args)
+
+    def open_par(self, args):
+        oper = args[0].value
+        pilaOperadores.push(oper)
+        return Tree('open_par', args)
+
+    def close_par(self, args):
+        pilaOperadores.pop()
+        return Tree('close_par', args)
     

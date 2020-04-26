@@ -63,7 +63,9 @@ ld_grammar = r"""
   factor: variable op_mat?
       | number
       | llamada
-      | "(" exp_logica_or ")"
+      | open_par exp_logica_or close_par
+	open_par: OPENPAR
+	close_par: CLOSEPAR
 	number: NUMBER
   op_mat: "$"
       | "¡"
@@ -103,6 +105,8 @@ ld_grammar = r"""
 	ADICION: "+" | "-"
 	PRODUCTO: "*" | "/"
 	IGUAL: "="
+	OPENPAR: "("
+	CLOSEPAR: ")"
   ID: WORD
   COMMENT: "%%" /(.|\\n|\\r)+/
 
