@@ -45,8 +45,9 @@ ld_grammar = r"""
   retorno: REGRESA "(" retorno_expresion ")" ";"
   retorno_expresion: expresion
   lectura: LEE "(" lista_vars ")" ";"
-  lista_vars: variable "," lista_vars
-      | variable
+  lista_vars: lee_variable "," lista_vars
+      | lee_variable
+  lee_variable: ID dimn? dimn?
   escritura: ESCRIBE "(" salida ")" ";"
   salida: STRING salida2?
       | expresion salida2?

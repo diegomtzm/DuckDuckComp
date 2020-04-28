@@ -228,6 +228,16 @@ class Tables(Transformer):
         pilaOperadores.pop()
         return Tree('close_par', args)
     
+    def lee_variable(self, args):
+        global quadCount
+        var = args[0].value
+        varDir = dirFunc[currFunc]['vars'][var][0]
+        quad = Quadruple('lee', None, None, varDir)
+        cuadruplos.append(quad.get())
+        quadCount += 1
+        # Falta leer y asignar valor a la variable
+        return Tree('lee_variable', args)
+
     def retorno_expresion(self, args):
         global quadCount
         var = pilaVariables.pop()
