@@ -42,7 +42,8 @@ ld_grammar = r"""
   llamada: ID "(" params2 ")"
   params2: expresion "," params2
       | expresion
-  retorno: REGRESA "(" expresion ")" ";"
+  retorno: REGRESA "(" retorno_expresion ")" ";"
+  retorno_expresion: expresion
   lectura: LEE "(" lista_vars ")" ";"
   lista_vars: variable "," lista_vars
       | variable

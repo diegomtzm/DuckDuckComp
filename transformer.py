@@ -228,3 +228,13 @@ class Tables(Transformer):
         pilaOperadores.pop()
         return Tree('close_par', args)
     
+    def retorno_expresion(self, args):
+        global quadCount
+        var = pilaVariables.pop()
+        varType = pilaTipos.pop()
+        # Cambiar var por su direccion de memoria
+        quad = Quadruple('retorno', None, None, var)
+        cuadruplos.append(quad.get())
+        quadCount += 1
+        # Falta hacer return al resultado
+        return Tree('retorno_expresion', args)
