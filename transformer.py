@@ -6,6 +6,7 @@
 from lark import Transformer, Tree
 from pprint import pprint
 from quadruples import *
+from semantics import *
 
 dirFunc = {}
 varGlobal = {}
@@ -13,6 +14,10 @@ currFunc = 'global'
 currType = ''
 temps = [None] * 1000
 tempCount = 0
+dvig = 1000
+dvfg = 4000
+dvcg = 7000
+dvbg = 9000
 types = {
     'int': int,
     'float': float,
@@ -58,13 +63,15 @@ class Tables(Transformer):
         global dirFunc
         global currFunc
         global currType
+        global dvig
         varList = dirFunc[currFunc]['vars']
         idName = args[0].value
         if idName in varList:
             print('\nError: multiple declaracion de funciones')
             print(f'\tVariable {args[0].value} ya existe en {currFunc}\n')
         else:
-            varList[idName] = currType
+            varList[idName] = {dvig, currType}
+            dvig += 1
             if currFunc == 'global':
                 varGlobal = varList
             else:
@@ -150,7 +157,7 @@ class Tables(Transformer):
                 leftOp = pilaVariables.pop()
                 leftType = pilaTipos.pop()
                 oper = pilaOperadores.pop()
-                result_type = 'int' # HACER CUBO SEMANTICO!!!
+                result_type = Semantics().get_type(leftType, rightType, oper)
                 if(result_type != 'ERROR'):
                     global tempCount
                     global quadCount
@@ -176,7 +183,7 @@ class Tables(Transformer):
                 leftOp = pilaVariables.pop()
                 leftType = pilaTipos.pop()
                 oper = pilaOperadores.pop()
-                result_type = 'int' # HACER CUBO SEMANTICO!!!
+                result_type = Semantics().get_type(leftType, rightType, oper)
                 if(result_type != 'ERROR'):
                     global tempCount
                     global quadCount
@@ -193,6 +200,7 @@ class Tables(Transformer):
         return Tree('factor', args)
 
     def fin_asignacion(self, args):
+        global dvig
         if pilaOperadores.size() > 0:
             top = pilaOperadores.top()
             if top == "=":
@@ -201,13 +209,15 @@ class Tables(Transformer):
                 var = pilaVariables.pop()
                 varType = pilaTipos.pop()
                 oper = pilaOperadores.pop()
-                result_type = 'int' # HACER CUBO SEMANTICO!!!
+                result_type = Semantics().get_type(resType, varType, oper)
                 if(result_type != 'ERROR'):
                     global quadCount
                     # valor de variable = resultado en memoria virtual
                     quad = Quadruple(oper, res, None, var)
                     cuadruplos.append(quad.get())
                     quadCount += 1
+                    dirFunc[currFunc]['vars'][var].add(result_type)
+                    # dvig += 1
                 else:
                     print("Error: Type mismatch")
         return Tree('fin_asignacion', args)
