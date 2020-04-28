@@ -70,7 +70,7 @@ class Tables(Transformer):
             print('\nError: multiple declaracion de funciones')
             print(f'\tVariable {args[0].value} ya existe en {currFunc}\n')
         else:
-            varList[idName] = {dvig, currType}
+            varList[idName] = [dvig, currType]
             dvig += 1
             if currFunc == 'global':
                 varGlobal = varList
@@ -200,7 +200,6 @@ class Tables(Transformer):
         return Tree('factor', args)
 
     def fin_asignacion(self, args):
-        global dvig
         if pilaOperadores.size() > 0:
             top = pilaOperadores.top()
             if top == "=":
@@ -209,15 +208,13 @@ class Tables(Transformer):
                 var = pilaVariables.pop()
                 varType = pilaTipos.pop()
                 oper = pilaOperadores.pop()
+                varDir = dirFunc[currFunc]['vars'][var][0]
                 result_type = Semantics().get_type(resType, varType, oper)
                 if(result_type != 'ERROR'):
                     global quadCount
-                    # valor de variable = resultado en memoria virtual
-                    quad = Quadruple(oper, res, None, var)
+                    quad = Quadruple(oper, res, None, varDir)
                     cuadruplos.append(quad.get())
                     quadCount += 1
-                    dirFunc[currFunc]['vars'][var].add(result_type)
-                    # dvig += 1
                 else:
                     print("Error: Type mismatch")
         return Tree('fin_asignacion', args)

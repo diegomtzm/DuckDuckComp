@@ -98,7 +98,7 @@ class Semantics():
   def get_type(self, leftType, rightType, oper):
     right = rightType
     while type(right) is not str:
-      right = rightType.pop()
+      right = rightType[1]
     res = self.Semantics[leftType][right][oper]
     print(leftType, right, oper, res)
     return res
