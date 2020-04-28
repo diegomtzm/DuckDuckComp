@@ -49,9 +49,10 @@ ld_grammar = r"""
       | lee_variable
   lee_variable: ID dimn? dimn?
   escritura: ESCRIBE "(" salida ")" ";"
-  salida: STRING salida2?
+  salida: string_salida salida2?
       | expresion salida2?
   salida2: "," salida
+  string_salida: STRING
   decision: SI "(" expresion ")" ENTONCES bloque sino?
   sino: SINO bloque
   rep_cond: MIENTRAS "(" expresion ")" HAZ bloque

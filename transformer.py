@@ -238,6 +238,23 @@ class Tables(Transformer):
         # Falta leer y asignar valor a la variable
         return Tree('lee_variable', args)
 
+    def salida(self, args):
+        global quadCount
+        var = pilaVariables.pop()
+        varType = pilaTipos.pop()
+        # Cambiar var por su direccion de memoria
+        quad = Quadruple('escribe', None, None, var)
+        cuadruplos.append(quad.get())
+        quadCount += 1
+        # Falta hacer print al resultado
+        return Tree('salida', args)
+
+    def string_salida(self, args):
+        var = args[0].value
+        pilaVariables.push(var)
+        pilaTipos.push('char')
+        return Tree('string_salida', args)
+
     def retorno_expresion(self, args):
         global quadCount
         var = pilaVariables.pop()
