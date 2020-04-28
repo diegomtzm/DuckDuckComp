@@ -34,34 +34,42 @@ ld_grammar = r"""
       | decision
       | rep_cond
       | rep_no_cond
-  asignacion: variable "=" expresion ";"
+  asignacion: variable igual expresion fin_asignacion
+	fin_asignacion: ";"
+	igual: IGUAL
   variable : ID dimn? dimn?
   dimn: "[" expresion "]"
   llamada: ID "(" params2 ")"
   params2: expresion "," params2
       | expresion
-  retorno: REGRESA "(" expresion ")" ";"
+  retorno: REGRESA "(" retorno_expresion ")" ";"
+  retorno_expresion: expresion
   lectura: LEE "(" lista_vars ")" ";"
-  lista_vars: variable "," lista_vars
-      | variable
+  lista_vars: lee_variable "," lista_vars
+      | lee_variable
+  lee_variable: ID dimn? dimn?
   escritura: ESCRIBE "(" salida ")" ";"
-  salida: STRING salida2?
+  salida: string_salida salida2?
       | expresion salida2?
   salida2: "," salida
+  string_salida: STRING
   decision: SI "(" expresion ")" ENTONCES bloque sino?
   sino: SINO bloque
   rep_cond: MIENTRAS "(" expresion ")" HAZ bloque
   rep_no_cond: DESDE variable "=" expresion HASTA expresion HACER bloque
   expresion: termino op1?
-  op1: "+" expresion
-      | "-" expresion
+  op1: adicion expresion
+	adicion: ADICION
   termino: factor op2?
-  op2: "*" termino
-      | "/" termino
+  op2: producto termino
+	producto: PRODUCTO
   factor: variable op_mat?
-      | NUMBER
+      | number
       | llamada
-      | "(" exp_logica_or ")"
+      | open_par exp_logica_or close_par
+	open_par: OPENPAR
+	close_par: CLOSEPAR
+	number: NUMBER
   op_mat: "$"
       | "¡"
       | "?"
@@ -97,6 +105,11 @@ ld_grammar = r"""
   DESDE: "desde"
   HASTA: "hasta"
   HACER: "hacer"
+	ADICION: "+" | "-"
+	PRODUCTO: "*" | "/"
+	IGUAL: "="
+	OPENPAR: "("
+	CLOSEPAR: ")"
   ID: WORD
   COMMENT: "%%" /(.|\\n|\\r)+/
 
