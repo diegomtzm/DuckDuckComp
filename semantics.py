@@ -6,7 +6,7 @@ class Semantics():
       'int' : { 
         # int, int
         'int' : {
-        '+' : 'int', '-' : 'int', '*' : 'int', '/' : 'int', '=' : 'int',
+        '+' : 'int', '-' : 'int', '*' : 'int', '/' : 'float', '=' : 'int',
         '<' : 'bool', '<=' : 'bool', '>' : 'bool', '>=' : 'bool', '!=' : 'bool', '==' : 'bool'
         },
         # int, float
@@ -100,7 +100,6 @@ class Semantics():
     while type(right) is not str:
       right = rightType[1]
     res = self.Semantics[leftType][right][oper]
-    print(leftType, right, oper, res)
     return res
 
 # Testing
