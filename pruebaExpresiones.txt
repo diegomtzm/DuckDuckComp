@@ -5,7 +5,7 @@ var
 
 principal() {
   a = 2 + 3;
-  desde k=0 hasta a + 5 hacer {
+  desde h=0 hasta a + 5 hacer {
     a = 2;
   }
   a = 7;

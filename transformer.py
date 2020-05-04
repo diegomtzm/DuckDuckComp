@@ -318,20 +318,14 @@ class Tables(Transformer):
         global currFunc
         varList = dirFunc[currFunc]['vars']
         idName = args[0].value
-        if idName in varList:
-            print('Error: Multiple declaracion de variables')
-            print(f'Variable {args[0].value} ya existe en {currFunc}')
+        if idName not in varList:
+            print('Error: Variable no declarada')
+            print(f'Variable {args[0].value} no existe en {currFunc}')
         else:
-            if currFunc == "global":
-                scope = 'globalTemp'
-            else:
-                scope = 'localTemp'
-
-            dirV = getNewDirV('int', scope)
-            varList[idName] = [dirV, 'int']
-            dirFunc[currFunc]['vars'] = varList
-            pilaVariables.push(dirV)
-            pilaTipos.push('int')
+            var = dirFunc[currFunc]['vars'][idName][0]
+            varType = dirFunc[currFunc]['vars'][idName][1]
+            pilaVariables.push(var)
+            pilaTipos.push(varType)
 
         return Tree('variable_desde', args)
 
