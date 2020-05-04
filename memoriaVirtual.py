@@ -56,6 +56,7 @@ tablaCtes = {}
 tablaOperadores = {
   "+": 1, "-": 2, "*": 3, "/": 4, "=": 5, "<=": 6, ">=": 7, ">": 8, "<": 9, 
   "!=": 10, "==": 11, "&": 12, "||": 13, "lee": 14, "escribe": 15, "regresa": 16,
+  "goTo": 17, "goToF": 18
 }
 
 def getNewDirV(varType, scope):

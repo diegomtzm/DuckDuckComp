@@ -194,6 +194,11 @@ class Tables(Transformer):
         pilaOperadores.push(oper)
         return Tree('igual', args)
 
+    def op_comp(self, args):
+        oper = args[0].value
+        pilaOperadores.push(oper)
+        return Tree('op_comp', args)
+
     def termino(self, args):
         if pilaOperadores.size() > 0:    
             top = pilaOperadores.top()
@@ -209,11 +214,20 @@ class Tables(Transformer):
                 generateQuad(currFunc)
         return Tree('factor', args)
 
+    def full_exp_comp(self, args):
+        if pilaOperadores.size() > 0:
+            top = pilaOperadores.top()
+            if top in [">", "<", "<=", ">=", "!=", "=="]:
+                generateQuad(currFunc)
+        return Tree('full_exp_comp', args)
+
     def fin_asignacion(self, args):
         if pilaOperadores.size() > 0:
             top = pilaOperadores.top()
             if top == "=":
                 generateAssigmentQuad()
+                pilaVariables.pop()
+                pilaTipos.pop()
         return Tree('fin_asignacion', args)
 
     def open_par(self, args):
@@ -264,3 +278,90 @@ class Tables(Transformer):
         quadCount += 1
         # Falta hacer return al resultado
         return Tree('retorno_expresion', args)
+
+    def decision_exp(self, args):
+        if pilaTipos.top() == "bool":
+            generateDecisionQuad()
+        else:
+            print("Error: Type mismatch")
+
+        return Tree('decision_exp', args)
+
+    def sino(self, args):
+        generateSinoQuad()
+        return Tree('sino', args)
+
+    def decision(self, args):
+        end = pilaSaltos.pop()
+        rellenarQuad(end)
+        return Tree('decision, args')
+
+    def mientras(self, args):
+        pushJump()
+
+    def haz(self, args):
+        if pilaTipos.top() == "bool":
+            generateDecisionQuad()
+        else:
+            print("Error: Type mismatch")
+        return Tree('haz', args)
+
+    def mientras_bloque(self, args):
+        end = pilaSaltos.pop()
+        returnJump = pilaSaltos.pop()
+        generateGoToQuad(returnJump)
+        rellenarQuad(end)
+        return Tree('mientras_bloque', args)
+
+    def variable_desde(self, args):
+        global dirFunc
+        global currFunc
+        varList = dirFunc[currFunc]['vars']
+        idName = args[0].value
+        if idName in varList:
+            print('Error: Multiple declaracion de variables')
+            print(f'Variable {args[0].value} ya existe en {currFunc}')
+        else:
+            if currFunc == "global":
+                scope = 'globalTemp'
+            else:
+                scope = 'localTemp'
+
+            dirV = getNewDirV('int', scope)
+            varList[idName] = [dirV, 'int']
+            dirFunc[currFunc]['vars'] = varList
+            pilaVariables.push(dirV)
+            pilaTipos.push('int')
+
+        return Tree('variable_desde', args)
+
+    def asignacion_desde_fin(self, args):
+        if pilaOperadores.size() > 0:
+            top = pilaOperadores.top()
+            if top == "=":
+                generateAssigmentQuad()
+        return Tree('asignacion_desde_fin', args)
+
+    def hacer(self, args):
+        pushJump(-1)
+        generateDesdeQuad(currFunc)
+        if pilaTipos.top() == "bool":
+            generateDecisionQuad()
+        else:
+            print("Error: Type mismatch")
+        return Tree('hacer', args)
+
+    def desde_bloque(self, args):
+        end = pilaSaltos.pop()
+        returnJump = pilaSaltos.pop()
+        # cuadruplo k = k + 1;
+        if '1' not in tablaCtes:
+            global dvcte
+            tablaCtes['1'] = dvcte
+            dvcte += 1
+
+        dirV = getDirV('1', 'cte')
+        generateDesdeFinQuad(currFunc, dirV, 'int')
+        generateGoToQuad(returnJump)
+        rellenarQuad(end)
+        return Tree('desde_bloque', args)

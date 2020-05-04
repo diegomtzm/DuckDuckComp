@@ -84,12 +84,12 @@ class Semantics():
         },
         # bool, char
         'char' : {
-          '+' : 'char', '-' : 'ERROR', '*' : 'ERROR', '/' : 'ERROR', '=' : 'char',
-          '<' : 'bool', '<=' : 'bool', '>' : 'bool', '>=' : 'bool', '!=' : 'bool', '==' : 'bool'
+          '+' : 'ERROR', '-' : 'ERROR', '*' : 'ERROR', '/' : 'ERROR', '=' : 'ERROR',
+          '<' : 'ERROR', '<=' : 'ERROR', '>' : 'ERROR', '>=' : 'ERROR', '!=' : 'ERROR', '==' : 'ERROR'
         },
         # bool, bool
         'bool' : {
-          '+' : 'ERROR', '-' : 'ERROR', '*' : 'ERROR', '/' : 'ERROR', '=' : 'ERROR',
+          '+' : 'ERROR', '-' : 'ERROR', '*' : 'ERROR', '/' : 'ERROR', '=' : 'bool',
           '<' : 'ERROR', '<=' : 'ERROR', '>' : 'ERROR', '>=' : 'ERROR', '!=' : 'bool', '==' : 'bool'
         }
       }

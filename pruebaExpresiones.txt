@@ -3,21 +3,10 @@ var
   int a, b, c, f, g, h;
   float d, e;
 
-funcion int doMath (int j):
-var float i;
-{ 
-  i = (3 * (2 + b / (5 * f + 1)));
-  regresa(i);
-}
-
-funcion void doNothing(int x):
-var int y;
-{
-  y = x;
-}
-
 principal() {
-  lee(b);
-  h = 2 + b * 5;
-  escribe(h);
+  a = 2 + 3;
+  desde k=0 hasta a + 5 hacer {
+    a = 2;
+  }
+  a = 7;
 }
