@@ -22,7 +22,7 @@ ld_grammar = r"""
    | CHAR
    | BOOL
    | VOID
-  dec_func: func_name "(" params ")" ":"
+  dec_func: func_name "(" params? ")" ":"
 	func_name: ID
   params: tipo param_name "," params
       | tipo param_name

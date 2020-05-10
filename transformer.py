@@ -37,6 +37,14 @@ def getDirV(operand, operandType):
 class Tables(Transformer):
     # Imprime el directorio de funciones para hacer pruebas
     def programa(self, args):
+        generateEndQuad()
+        tempCount = getTempCount()
+        dirFunc[currFunc]['tempCount'] = tempCount
+        # No se borran aun para poder probar, 
+        # descomentar siguiente linea para borrar la tabla de variables
+        # del dirFunc[currFunc]['vars']
+        resetTempCount()
+
         print("\nDirectorio de funciones:\n")
         pprint(dirFunc)
         print("\nTabla de constantes:\n")
@@ -90,7 +98,7 @@ class Tables(Transformer):
             print('\nError: multiple declaracion de funciones')
             print(f'\tFuncion {currFunc} ya existe\n')
         else:
-            dirFunc[currFunc] = {'type': currType, 'vars': {}}
+            dirFunc[currFunc] = {'type': currType, 'vars': {}, 'params': ''}
 
         return Tree('func_name', args)
 
@@ -120,6 +128,14 @@ class Tables(Transformer):
             'bool': dvblt
         }
 
+        generateEndFuncQuad()
+        tempCount = getTempCount()
+        dirFunc[currFunc]['tempCount'] = tempCount
+        # No se borran aun para poder probar, 
+        # descomentar siguiente linea para borrar la tabla de variables
+        # del dirFunc[currFunc]['vars']
+        resetTempCount()
+
         return Tree('func', args)
 
     def param_name(self, args):
@@ -135,12 +151,25 @@ class Tables(Transformer):
             dirV = getNewDirV(currType, 'local')
             varList[idName] = [dirV, currType]
             dirFunc[currFunc]['vars'] = varList
+            dirFunc[currFunc]['params'] += currType[0]
 
         return Tree('param_name', args)
+
+    def dec_var(self, args):
+        if currFunc == 'global':
+            dirFunc[currFunc]['varsCount'] = len(dirFunc[currFunc]['vars'])
+        else:
+            dirFunc[currFunc]['varsCount'] = len(dirFunc[currFunc]['vars']) - len(dirFunc[currFunc]['params'])
+            quadCount = getCurrentQuadCount()
+            dirFunc[currFunc]['start'] = quadCount
+        
+        return Tree('dec_var', args)
 
     def principal(self, args):
         global currFunc
         currFunc = 'global'
+        quadCount = getCurrentQuadCount()
+        dirFunc[currFunc]['start'] = quadCount
         return Tree('principal', args)
 
     def tipo(self, args):
@@ -243,21 +272,12 @@ class Tables(Transformer):
         global quadCount
         var = args[0].value
         varDir = dirFunc[currFunc]['vars'][var][0]
-        codigoOp = tablaOperadores['lee']
-        quad = Quadruple(codigoOp, None, None, varDir)
-        cuadruplos.append(quad.get())
-        quadCount += 1
+        generateLeeVariableQuad(varDir)
         # Falta leer y asignar valor a la variable
         return Tree('lee_variable', args)
 
     def salida(self, args):
-        global quadCount
-        var = pilaVariables.pop()
-        varType = pilaTipos.pop()
-        codigoOp = tablaOperadores['escribe']
-        quad = Quadruple(codigoOp, None, None, var)
-        cuadruplos.append(quad.get())
-        quadCount += 1
+        generateSalidaQuad()
         # Falta hacer print al resultado
         return Tree('salida', args)
 
@@ -268,14 +288,7 @@ class Tables(Transformer):
         return Tree('string_salida', args)
 
     def retorno_expresion(self, args):
-        global quadCount
-        var = pilaVariables.pop()
-        varType = pilaTipos.pop()
-        # Cambiar var por su direccion de memoria
-        codigoOp = tablaOperadores['regresa']
-        quad = Quadruple(codigoOp, None, None, var)
-        cuadruplos.append(quad.get())
-        quadCount += 1
+        generateRetornoExp()
         # Falta hacer return al resultado
         return Tree('retorno_expresion', args)
 
@@ -294,7 +307,7 @@ class Tables(Transformer):
     def decision(self, args):
         end = pilaSaltos.pop()
         rellenarQuad(end)
-        return Tree('decision, args')
+        return Tree('decision', args)
 
     def mientras(self, args):
         pushJump()

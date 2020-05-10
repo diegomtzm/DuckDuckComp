@@ -3,10 +3,19 @@ var
   int a, b, c, f, g, h;
   float d, e;
 
+funcion int fact (int j, float k, float m, bool n):
+var int i;
+{ 
+  i = 2;
+  regresa(i);
+}
+
+funcion void inicia(int y):
+var int x;
+{
+  x = 5;
+}
+
 principal() {
   a = 2 + 3;
-  desde h=0 hasta a + 5 hacer {
-    a = 2;
-  }
-  a = 7;
 }

@@ -9,6 +9,7 @@ pilaTipos = Stack()
 
 cuadruplos = []
 quadCount = 0
+tempCount = 0
 
 class Quadruple:
   def __init__(self, operator, leftOp, rightOp, res):
@@ -30,6 +31,7 @@ def generateQuad(currFunc):
     result_type = Semantics().get_type(leftType, rightType, oper)
     if(result_type != 'ERROR'):
         global quadCount
+        global tempCount
         global cuadruplos
 
         if currFunc == "global":
@@ -44,6 +46,7 @@ def generateQuad(currFunc):
         cuadruplos.append(quad.get())
         pilaVariables.push(dirVTemp)
         pilaTipos.push(result_type)
+        tempCount += 1
         quadCount += 1
     else:
         print("Error: Type mismatch")
@@ -110,6 +113,7 @@ def generateDesdeQuad(currFunc):
     
     if(result_type != 'ERROR'):
         global quadCount
+        global tempCount
         global cuadruplos
 
         if currFunc == "global":
@@ -125,6 +129,7 @@ def generateDesdeQuad(currFunc):
         pilaTipos.push(varType)
         pilaVariables.push(dirVTemp)
         pilaTipos.push(result_type)
+        tempCount += 1
         quadCount += 1
     else:
         print("Error: Type mismatch")
@@ -135,6 +140,7 @@ def generateDesdeFinQuad(currFunc, right, rightType):
     result_type = Semantics().get_type(varType, rightType, "+")
     if(result_type != 'ERROR'):
         global quadCount
+        global tempCount
         global cuadruplos
 
         if currFunc == "global":
@@ -152,6 +158,7 @@ def generateDesdeFinQuad(currFunc, right, rightType):
         codigoOper = tablaOperadores['=']
         quad2 = Quadruple(codigoOper, dirVTemp, None, var)
         cuadruplos.append(quad2.get())
+        tempCount += 1
         quadCount += 1
     else:
         print("Error: Type mismatch")
@@ -180,3 +187,29 @@ def generateRetornoExp():
     quad = Quadruple(codigoOp, None, None, var)
     cuadruplos.append(quad.get())
     quadCount += 1
+
+def generateEndFuncQuad():
+    global quadCount
+    codigoOp = tablaOperadores['endFunc']
+    quad = Quadruple(codigoOp, None, None, None)
+    cuadruplos.append(quad.get())
+    quadCount += 1
+
+def generateEndQuad():
+    global quadCount
+    codigoOp = tablaOperadores['end']
+    quad = Quadruple(codigoOp, None, None, None)
+    cuadruplos.append(quad.get())
+    quadCount += 1
+
+def getCurrentQuadCount():
+    global quadCount
+    return quadCount
+
+def getTempCount():
+    global tempCount
+    return tempCount
+
+def resetTempCount():
+    global tempCount
+    tempCount = 0
