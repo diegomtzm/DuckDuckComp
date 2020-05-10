@@ -155,6 +155,28 @@ def generateDesdeFinQuad(currFunc, right, rightType):
         quadCount += 1
     else:
         print("Error: Type mismatch")
-  
 
+def generateLeeVariableQuad(varDir):
+    global quadCount
+    codigoOp = tablaOperadores['lee']
+    quad = Quadruple(codigoOp, None, None, varDir)
+    cuadruplos.append(quad.get())
+    quadCount += 1
 
+def generateSalidaQuad():
+    global quadCount
+    var = pilaVariables.pop()
+    varType = pilaTipos.pop()
+    codigoOp = tablaOperadores['escribe']
+    quad = Quadruple(codigoOp, None, None, var)
+    cuadruplos.append(quad.get())
+    quadCount += 1
+
+def generateRetornoExp():
+    global quadCount
+    var = pilaVariables.pop()
+    varType = pilaTipos.pop()
+    codigoOp = tablaOperadores['regresa']
+    quad = Quadruple(codigoOp, None, None, var)
+    cuadruplos.append(quad.get())
+    quadCount += 1
