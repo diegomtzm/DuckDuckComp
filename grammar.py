@@ -41,7 +41,10 @@ ld_grammar = r"""
 	igual: IGUAL
   variable: ID dimn? dimn?
   dimn: "[" expresion "]"
-  llamada: ID "(" params2 ")"
+  llamada: llamada_name inicio_llamada params2? fin_llamada
+  llamada_name: ID
+  inicio_llamada: "("
+  fin_llamada: ")"
   params2: expresion "," params2
       | expresion
   retorno: REGRESA "(" retorno_expresion ")" ";"

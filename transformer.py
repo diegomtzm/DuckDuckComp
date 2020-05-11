@@ -101,6 +101,32 @@ class Tables(Transformer):
             dirFunc[currFunc] = {'type': currType, 'vars': {}, 'params': ''}
 
         return Tree('func_name', args)
+    
+    def llamada_name(self, args):
+        global currFunc
+        currFunc = args[0].value
+        if currFunc in dirFunc:
+            print(f'\tTodo bien, la funcion: {currFunc} ya existe\n')
+            pilaVariables.push(currFunc) # No estoy seguro
+        else:
+            print(f'\tError: la funcion: {currFunc} no existe\n')
+
+        return Tree('llamada_name', args)
+
+    def inicio_llamada(self, args):
+        funcName = pilaVariables.top()
+        pilaVariables.pop()
+        params = dirFunc[funcName]['params']
+        generateERAQuad(funcName, params)
+        return ('inicio_llamada', args)
+
+    def params2(self, args):
+        generateParamQuad()
+        return ('params2', args)
+
+    def fin_llamada(self, args):
+        generateGoSubQuad()
+        return ('fin_llamada', args)
 
     # Clean up the function by restarting all virtual memory addresses
     def func(self, args):
@@ -164,6 +190,10 @@ class Tables(Transformer):
             dirFunc[currFunc]['start'] = quadCount
         
         return Tree('dec_var', args)
+
+    # def llamada(self, args):
+
+    #     return Tree('llamada', args)
 
     def principal(self, args):
         global currFunc

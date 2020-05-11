@@ -10,6 +10,8 @@ pilaTipos = Stack()
 cuadruplos = []
 quadCount = 0
 tempCount = 0
+paramCount = 0
+currParams = []
 
 class Quadruple:
   def __init__(self, operator, leftOp, rightOp, res):
@@ -201,6 +203,45 @@ def generateEndQuad():
     quad = Quadruple(codigoOp, None, None, None)
     cuadruplos.append(quad.get())
     quadCount += 1
+
+def generateERAQuad(funcName, params):
+    global quadCount
+    global paramCount
+    global currParams
+    codigoOp = tablaOperadores['era']
+    quad = Quadruple(codigoOp, funcName, None, None)
+    cuadruplos.append(quad.get())
+    quadCount += 1
+    currParams = params
+    paramCount = len(currParams)-1
+
+def generateParamQuad():
+    global quadCount
+    global paramCount
+    var = pilaVariables.pop()
+    varType = pilaTipos.pop()
+    if varType[0] == currParams[paramCount]:
+        codigoOp = tablaOperadores['param']
+        quad = Quadruple(codigoOp, var, paramCount, None)
+        cuadruplos.append(quad.get())
+        quadCount += 1
+        paramCount -= 1
+    else:
+        print('Error: param type mismatch')
+
+def generateGoSubQuad():
+    global quadCount
+    global paramCount
+    print('paramcount: ', paramCount)
+    if paramCount == -1:
+        # codigoOp = tablaOperadores['goSub']
+        # Falta asignar funcName y address de la funcion
+        # quad = Quadruple(codigoOp, funcName, None, initialAddress)
+        # quadCount += 1
+        print('Number of params match')
+    else:
+        print('Error: number of params mismatch')
+        
 
 def getCurrentQuadCount():
     global quadCount

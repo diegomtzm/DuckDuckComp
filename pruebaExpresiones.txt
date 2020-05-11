@@ -10,7 +10,7 @@ var int i;
   regresa(i);
 }
 
-funcion void inicia(int y):
+funcion void inicia(int y, float z):
 var int x;
 {
   x = 5;
@@ -18,4 +18,5 @@ var int x;
 
 principal() {
   a = 2 + 3;
+  inicia(a, 2.2+3);
 }
