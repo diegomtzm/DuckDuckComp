@@ -191,10 +191,6 @@ class Tables(Transformer):
         
         return Tree('dec_var', args)
 
-    # def llamada(self, args):
-
-    #     return Tree('llamada', args)
-
     def principal(self, args):
         global currFunc
         currFunc = 'global'

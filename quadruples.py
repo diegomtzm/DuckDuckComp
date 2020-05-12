@@ -12,6 +12,7 @@ quadCount = 0
 tempCount = 0
 paramCount = 0
 currParams = []
+currFuncCall = ''
 
 class Quadruple:
   def __init__(self, operator, leftOp, rightOp, res):
@@ -208,12 +209,14 @@ def generateERAQuad(funcName, params):
     global quadCount
     global paramCount
     global currParams
+    global currFuncCall
     codigoOp = tablaOperadores['era']
     quad = Quadruple(codigoOp, funcName, None, None)
     cuadruplos.append(quad.get())
     quadCount += 1
     currParams = params
     paramCount = len(currParams)-1
+    currFuncCall = funcName
 
 def generateParamQuad():
     global quadCount
@@ -232,12 +235,12 @@ def generateParamQuad():
 def generateGoSubQuad():
     global quadCount
     global paramCount
-    print('paramcount: ', paramCount)
     if paramCount == -1:
-        # codigoOp = tablaOperadores['goSub']
-        # Falta asignar funcName y address de la funcion
-        # quad = Quadruple(codigoOp, funcName, None, initialAddress)
-        # quadCount += 1
+        codigoOp = tablaOperadores['goSub']
+        # Falta asignar initialAddress de la funcion
+        quad = Quadruple(codigoOp, currFuncCall, None, None)
+        cuadruplos.append(quad.get())
+        quadCount += 1
         print('Number of params match')
     else:
         print('Error: number of params mismatch')
