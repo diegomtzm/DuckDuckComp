@@ -232,13 +232,13 @@ def generateParamQuad():
     else:
         print('Error: param type mismatch')
 
-def generateGoSubQuad():
+def generateGoSubQuad(initAddress):
     global quadCount
     global paramCount
     if paramCount == -1:
         codigoOp = tablaOperadores['goSub']
         # Falta asignar initialAddress de la funcion
-        quad = Quadruple(codigoOp, currFuncCall, None, None)
+        quad = Quadruple(codigoOp, currFuncCall, None, initAddress)
         cuadruplos.append(quad.get())
         quadCount += 1
     else:

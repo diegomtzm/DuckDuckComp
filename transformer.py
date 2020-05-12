@@ -10,6 +10,7 @@ from quadruples import *
 dirFunc = {}
 currFunc = 'global'
 currType = ''
+currFuncCall = ''
 
 # Return the variable type
 def getTipo(var):
@@ -103,20 +104,16 @@ class Tables(Transformer):
         return Tree('func_name', args)
     
     def llamada_name(self, args):
-        global currFunc
-        currFunc = args[0].value
-        if currFunc in dirFunc:
-            pilaVariables.push(currFunc)
-        else:
-            print(f'\tError: la funcion: {currFunc} no existe\n')
+        global currFuncCall
+        currFuncCall = args[0].value
+        if currFuncCall not in dirFunc:
+            print(f'\tError: la funcion: {currFuncCall} no existe\n')
 
         return Tree('llamada_name', args)
 
     def inicio_llamada(self, args):
-        funcName = pilaVariables.top()
-        pilaVariables.pop()
-        params = dirFunc[funcName]['params']
-        generateERAQuad(funcName, params)
+        params = dirFunc[currFuncCall]['params']
+        generateERAQuad(currFuncCall, params)
         return ('inicio_llamada', args)
 
     def params2(self, args):
@@ -124,7 +121,8 @@ class Tables(Transformer):
         return ('params2', args)
 
     def fin_llamada(self, args):
-        generateGoSubQuad()
+        initAddress = dirFunc[currFuncCall]['start']
+        generateGoSubQuad(initAddress)
         return ('fin_llamada', args)
 
     # Clean up the function by restarting all virtual memory addresses
