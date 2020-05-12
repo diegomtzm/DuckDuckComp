@@ -215,7 +215,7 @@ def generateERAQuad(funcName, params):
     cuadruplos.append(quad.get())
     quadCount += 1
     currParams = params
-    paramCount = len(currParams)-1
+    paramCount = 0
     currFuncCall = funcName
 
 def generateParamQuad():
@@ -223,21 +223,23 @@ def generateParamQuad():
     global paramCount
     var = pilaVariables.pop()
     varType = pilaTipos.pop()
-    if varType[0] == currParams[paramCount]:
-        codigoOp = tablaOperadores['param']
-        quad = Quadruple(codigoOp, var, paramCount, None)
-        cuadruplos.append(quad.get())
-        quadCount += 1
-        paramCount -= 1
+    if paramCount < len(currParams):
+        if varType[0] == currParams[paramCount]:
+            codigoOp = tablaOperadores['param']
+            quad = Quadruple(codigoOp, var, paramCount, None)
+            cuadruplos.append(quad.get())
+            quadCount += 1
+            paramCount += 1
+        else:
+            print('Error: param type mismatch')
     else:
-        print('Error: param type mismatch')
+        print('Error: param count mismatch')
 
 def generateGoSubQuad(initAddress):
     global quadCount
     global paramCount
-    if paramCount == -1:
+    if paramCount == len(currParams):
         codigoOp = tablaOperadores['goSub']
-        # Falta asignar initialAddress de la funcion
         quad = Quadruple(codigoOp, currFuncCall, None, initAddress)
         cuadruplos.append(quad.get())
         quadCount += 1

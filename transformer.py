@@ -116,9 +116,9 @@ class Tables(Transformer):
         generateERAQuad(currFuncCall, params)
         return ('inicio_llamada', args)
 
-    def params2(self, args):
+    def params_exp(self, args):
         generateParamQuad()
-        return ('params2', args)
+        return ('params_exp', args)
 
     def fin_llamada(self, args):
         initAddress = dirFunc[currFuncCall]['start']

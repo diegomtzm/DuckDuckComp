@@ -45,8 +45,9 @@ ld_grammar = r"""
   llamada_name: ID
   inicio_llamada: "("
   fin_llamada: ")"
-  params2: expresion "," params2
-      | expresion
+  params2: params_exp "," params2
+      | params_exp
+  params_exp: expresion
   retorno: REGRESA "(" retorno_expresion ")" ";"
   retorno_expresion: expresion
   lectura: LEE "(" lista_vars ")" ";"
