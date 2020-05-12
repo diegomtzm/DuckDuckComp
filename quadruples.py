@@ -241,7 +241,6 @@ def generateGoSubQuad():
         quad = Quadruple(codigoOp, currFuncCall, None, None)
         cuadruplos.append(quad.get())
         quadCount += 1
-        print('Number of params match')
     else:
         print('Error: number of params mismatch')
         

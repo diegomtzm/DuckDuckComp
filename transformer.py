@@ -106,8 +106,7 @@ class Tables(Transformer):
         global currFunc
         currFunc = args[0].value
         if currFunc in dirFunc:
-            print(f'\tTodo bien, la funcion: {currFunc} ya existe\n')
-            pilaVariables.push(currFunc) # No estoy seguro
+            pilaVariables.push(currFunc)
         else:
             print(f'\tError: la funcion: {currFunc} no existe\n')
 
