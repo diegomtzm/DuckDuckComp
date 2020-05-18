@@ -56,8 +56,9 @@ ld_grammar = r"""
   lee_variable: ID dimn? dimn?
   escritura: ESCRIBE "(" salida ")" ";"
   salida: string_salida salida2?
-      | expresion salida2?
+      | expresion_salida salida2?
   salida2: "," salida
+  expresion_salida: expresion
   string_salida: STRING
   decision: SI "(" decision_exp ")" ENTONCES bloque sino_bloque?
   decision_exp: expresion

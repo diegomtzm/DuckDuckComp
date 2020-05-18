@@ -9,7 +9,10 @@ pilaTipos = Stack()
 
 cuadruplos = []
 quadCount = 0
-tempCount = 0
+iTempCount = 0
+fTempCount = 0
+cTempCount = 0
+bTempCount = 0
 paramCount = 0
 currParams = []
 currFuncCall = ''
@@ -34,7 +37,10 @@ def generateQuad(currFunc):
     result_type = Semantics().get_type(leftType, rightType, oper)
     if(result_type != 'ERROR'):
         global quadCount
-        global tempCount
+        global iTempCount
+        global fTempCount
+        global cTempCount
+        global bTempCount
         global cuadruplos
 
         if currFunc == "global":
@@ -46,10 +52,17 @@ def generateQuad(currFunc):
         codigoOper = tablaOperadores[oper]
 
         quad = Quadruple(codigoOper, leftOp, rightOp, dirVTemp)
-        cuadruplos.append(quad.get())
+        cuadruplos.append(quad)
         pilaVariables.push(dirVTemp)
         pilaTipos.push(result_type)
-        tempCount += 1
+        if result_type == 'int':
+            iTempCount += 1
+        elif result_type == 'float':
+            fTempCount += 1
+        elif result_type == 'char':
+            cTempCount += 1
+        elif result_type == 'bool':
+            bTempCount += 1
         quadCount += 1
     else:
         print("Error: Type mismatch")
@@ -60,12 +73,13 @@ def generateAssigmentQuad():
     var = pilaVariables.pop()
     varType = pilaTipos.pop()
     oper = pilaOperadores.pop()
-    result_type = Semantics().get_type(resType, varType, oper)
+    result_type = Semantics().get_type(varType, resType, oper)
+    print(varType, resType, oper, result_type)
     if(result_type != 'ERROR'):
         global quadCount
         codigoOper = tablaOperadores[oper]
         quad = Quadruple(codigoOper, res, None, var)
-        cuadruplos.append(quad.get())
+        cuadruplos.append(quad)
         quadCount += 1
         pilaVariables.push(var)
         pilaTipos.push(varType)
@@ -78,7 +92,7 @@ def generateDecisionQuad():
     tipo = pilaTipos.pop()
     codigoOp = tablaOperadores['goToF']
     quad = Quadruple(codigoOp, res, None, "")
-    cuadruplos.append(quad.get())
+    cuadruplos.append(quad)
     quadCount += 1
     pilaSaltos.push(quadCount - 1)
     
@@ -86,7 +100,7 @@ def generateSinoQuad():
     global quadCount
     codigoOp = tablaOperadores['goTo']
     quad = Quadruple(codigoOp, None, None, "")
-    cuadruplos.append(quad.get())
+    cuadruplos.append(quad)
     quadCount += 1
     numQuad = pilaSaltos.pop()
     pilaSaltos.push(quadCount - 1)
@@ -96,7 +110,7 @@ def generateGoToQuad(returnJump):
     global quadCount
     codigoOp = tablaOperadores['goTo']
     quad = Quadruple(codigoOp, None, None, returnJump)
-    cuadruplos.append(quad.get())
+    cuadruplos.append(quad)
     quadCount += 1
 
 def rellenarQuad(numQuad):
@@ -116,7 +130,10 @@ def generateDesdeQuad(currFunc):
     
     if(result_type != 'ERROR'):
         global quadCount
-        global tempCount
+        global iTempCount
+        global fTempCount
+        global cTempCount
+        global bTempCount
         global cuadruplos
 
         if currFunc == "global":
@@ -127,12 +144,19 @@ def generateDesdeQuad(currFunc):
         dirVTemp = getNewDirV(result_type, scope)
         codigoOper = tablaOperadores['<=']
         quad = Quadruple(codigoOper, var, res, dirVTemp)
-        cuadruplos.append(quad.get())
+        cuadruplos.append(quad)
         pilaVariables.push(var)
         pilaTipos.push(varType)
         pilaVariables.push(dirVTemp)
         pilaTipos.push(result_type)
-        tempCount += 1
+        if result_type == 'int':
+            iTempCount += 1
+        elif result_type == 'float':
+            fTempCount += 1
+        elif result_type == 'char':
+            cTempCount += 1
+        elif result_type == 'bool':
+            bTempCount += 1
         quadCount += 1
     else:
         print("Error: Type mismatch")
@@ -143,7 +167,7 @@ def generateDesdeFinQuad(currFunc, right, rightType):
     result_type = Semantics().get_type(varType, rightType, "+")
     if(result_type != 'ERROR'):
         global quadCount
-        global tempCount
+        global iTempCount
         global cuadruplos
 
         if currFunc == "global":
@@ -155,13 +179,13 @@ def generateDesdeFinQuad(currFunc, right, rightType):
         codigoOper = tablaOperadores['+']
         
         quad = Quadruple(codigoOper, var, right, dirVTemp)
-        cuadruplos.append(quad.get())
+        cuadruplos.append(quad)
         quadCount += 1
 
         codigoOper = tablaOperadores['=']
         quad2 = Quadruple(codigoOper, dirVTemp, None, var)
         cuadruplos.append(quad2.get())
-        tempCount += 1
+        iTempCount += 1
         quadCount += 1
     else:
         print("Error: Type mismatch")
@@ -170,7 +194,7 @@ def generateLeeVariableQuad(varDir):
     global quadCount
     codigoOp = tablaOperadores['lee']
     quad = Quadruple(codigoOp, None, None, varDir)
-    cuadruplos.append(quad.get())
+    cuadruplos.append(quad)
     quadCount += 1
 
 def generateSalidaQuad():
@@ -179,7 +203,7 @@ def generateSalidaQuad():
     varType = pilaTipos.pop()
     codigoOp = tablaOperadores['escribe']
     quad = Quadruple(codigoOp, None, None, var)
-    cuadruplos.append(quad.get())
+    cuadruplos.append(quad)
     quadCount += 1
 
 def generateRetornoExp():
@@ -188,21 +212,21 @@ def generateRetornoExp():
     varType = pilaTipos.pop()
     codigoOp = tablaOperadores['regresa']
     quad = Quadruple(codigoOp, None, None, var)
-    cuadruplos.append(quad.get())
+    cuadruplos.append(quad)
     quadCount += 1
 
 def generateEndFuncQuad():
     global quadCount
     codigoOp = tablaOperadores['endFunc']
     quad = Quadruple(codigoOp, None, None, None)
-    cuadruplos.append(quad.get())
+    cuadruplos.append(quad)
     quadCount += 1
 
 def generateEndQuad():
     global quadCount
     codigoOp = tablaOperadores['end']
     quad = Quadruple(codigoOp, None, None, None)
-    cuadruplos.append(quad.get())
+    cuadruplos.append(quad)
     quadCount += 1
 
 def generateERAQuad(funcName, params):
@@ -212,7 +236,7 @@ def generateERAQuad(funcName, params):
     global currFuncCall
     codigoOp = tablaOperadores['era']
     quad = Quadruple(codigoOp, funcName, None, None)
-    cuadruplos.append(quad.get())
+    cuadruplos.append(quad)
     quadCount += 1
     currParams = params
     paramCount = 0
@@ -227,7 +251,7 @@ def generateParamQuad():
         if varType[0] == currParams[paramCount]:
             codigoOp = tablaOperadores['param']
             quad = Quadruple(codigoOp, var, paramCount, None)
-            cuadruplos.append(quad.get())
+            cuadruplos.append(quad)
             quadCount += 1
             paramCount += 1
         else:
@@ -241,7 +265,7 @@ def generateGoSubQuad(initAddress):
     if paramCount == len(currParams):
         codigoOp = tablaOperadores['goSub']
         quad = Quadruple(codigoOp, currFuncCall, None, initAddress)
-        cuadruplos.append(quad.get())
+        cuadruplos.append(quad)
         quadCount += 1
     else:
         print('Error: number of params mismatch')
@@ -252,9 +276,16 @@ def getCurrentQuadCount():
     return quadCount
 
 def getTempCount():
-    global tempCount
+    global iTempCount
+    global fTempCount
+    global cTempCount
+    global bTempCount
+    tempCount = str(iTempCount) + str(fTempCount) + str(cTempCount) + str(bTempCount)
     return tempCount
 
 def resetTempCount():
-    global tempCount
-    tempCount = 0
+    global iTempCount
+    global fTempCount
+    global cTempCount
+    global bTempCount
+    iTempCount, fTempCount, cTempCount, bTempCount = 0, 0, 0, 0

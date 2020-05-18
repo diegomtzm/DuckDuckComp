@@ -29,7 +29,7 @@ class Semantics():
       'float' : { 
         # float, int
         'int' : {
-        '+' : 'float', '-' : 'float', '*' : 'float', '/' : 'float', '=' : 'ERROR',
+        '+' : 'float', '-' : 'float', '*' : 'float', '/' : 'float', '=' : 'float',
         '<' : 'bool', '<=' : 'bool', '>' : 'bool', '>=' : 'bool', '!=' : 'bool', '==' : 'bool'
         },
         # float, float

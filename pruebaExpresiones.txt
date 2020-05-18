@@ -6,17 +6,18 @@ var
 funcion int fact (int j, float k, float m, bool n):
 var int i;
 { 
-  i = 2;
+  %% i = 2;
   regresa(i);
 }
 
 funcion void inicia(int y, float z):
 var int x;
 {
-  x = 5;
+  %% x = 5;
 }
 
 principal() {
   a = 2 + 3;
-  inicia(a, 2.2+3);
+  d = 8;
+  escribe("hello world", 2 * 3 + (4 / 2));
 }

@@ -6,6 +6,7 @@
 from lark import Transformer, Tree
 from pprint import pprint
 from quadruples import *
+from maquinaVirtual import *
 
 dirFunc = {}
 currFunc = 'global'
@@ -35,6 +36,20 @@ def getDirV(operand, operandType):
     elif operandType == 'cte':
         return tablaCtes[operand]
 
+def getVarsCount(vars):
+    iCount, fCount, cCount, bCount = 0, 0, 0, 0
+    for _, val in vars.items():
+        if val[1] == 'int':
+            iCount += 1
+        elif val[1] == 'float':
+            fCount += 1
+        elif val[1] == 'char':
+            cCount += 1
+        elif val[1] == 'bool':
+            bCount += 1
+    varsCount = str(iCount) + str(fCount) + str(cCount) + str(bCount)
+    return varsCount
+
 class Tables(Transformer):
     # Imprime el directorio de funciones para hacer pruebas
     def programa(self, args):
@@ -50,6 +65,8 @@ class Tables(Transformer):
         pprint(dirFunc)
         print("\nTabla de constantes:\n")
         print(tablaCtes)
+        print("\nTabla de dir de constantes:\n")
+        print(tablaCtesDir)
         print("\nTabla de operadores:\n")
         print(tablaOperadores)
         print("\nPila Variables:\n")
@@ -59,7 +76,11 @@ class Tables(Transformer):
         print("\nPila Operadores:\n")
         print(pilaOperadores.get())
         print("\nCuadruplos:\n")
-        print(cuadruplos)
+        for c in cuadruplos:
+            print(c.get(), end='')
+        print("\n")
+        MV = MaquinaVirtual(cuadruplos, tablaCtesDir, dirFunc)
+        MV.execute()
         return Tree('program', args)
 
     def start(self, args):
@@ -180,9 +201,9 @@ class Tables(Transformer):
 
     def dec_var(self, args):
         if currFunc == 'global':
-            dirFunc[currFunc]['varsCount'] = len(dirFunc[currFunc]['vars'])
+            dirFunc[currFunc]['varsCount'] = getVarsCount(dirFunc[currFunc]['vars'])
         else:
-            dirFunc[currFunc]['varsCount'] = len(dirFunc[currFunc]['vars']) - len(dirFunc[currFunc]['params'])
+            dirFunc[currFunc]['varsCount'] = getVarsCount(dirFunc[currFunc]['vars'])
             quadCount = getCurrentQuadCount()
             dirFunc[currFunc]['start'] = quadCount
         
@@ -224,6 +245,7 @@ class Tables(Transformer):
 
         if var not in tablaCtes:
             tablaCtes[var] = dvcte
+            tablaCtesDir[dvcte] = var
             dvcte += 1
 
         dirV = getDirV(var, 'cte')
@@ -299,16 +321,16 @@ class Tables(Transformer):
         # Falta leer y asignar valor a la variable
         return Tree('lee_variable', args)
 
-    def salida(self, args):
-        generateSalidaQuad()
-        # Falta hacer print al resultado
-        return Tree('salida', args)
-
     def string_salida(self, args):
         var = args[0].value
         pilaVariables.push(var)
         pilaTipos.push('char')
+        generateSalidaQuad()
         return Tree('string_salida', args)
+
+    def expresion_salida(self, args):
+        generateSalidaQuad()
+        return Tree('expresion_salida', args)
 
     def retorno_expresion(self, args):
         generateRetornoExp()
@@ -388,6 +410,7 @@ class Tables(Transformer):
         if '1' not in tablaCtes:
             global dvcte
             tablaCtes['1'] = dvcte
+            tablaCtesDir[dvcte] = '1'
             dvcte += 1
 
         dirV = getDirV('1', 'cte')
