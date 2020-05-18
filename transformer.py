@@ -20,8 +20,7 @@ def getTipo(var):
     elif var in dirFunc['global']['vars']:
         return dirFunc['global']['vars'][var][1]
     else:
-        print(f'Error: Variable {var} no esta declarada')
-        return False
+        raise NameError(f'Variable {var} no esta declarada')
 
 # Return the operand virtual memory address
 def getDirV(operand, operandType):
@@ -31,8 +30,7 @@ def getDirV(operand, operandType):
         elif operand in dirFunc['global']['vars']:
             return dirFunc['global']['vars'][operand][0]
         else:
-            print(f'Error: Variable {operand} no esta declarada')
-            return False
+            raise NameError(f'Variable {operand} no esta declarada')
     elif operandType == 'cte':
         return tablaCtes[operand]
 
@@ -86,7 +84,7 @@ class Tables(Transformer):
     def start(self, args):
         global dirFunc
         if 'global' in dirFunc:
-            print('Error: doble declaración de programa')
+            raise NameError('doble declaración de programa')
         else:
             dirFunc['global'] = {'type': 'program', 'vars': {}}
 
@@ -99,8 +97,7 @@ class Tables(Transformer):
         varList = dirFunc[currFunc]['vars']
         idName = args[0].value
         if idName in varList:
-            print('\nError: multiple declaracion de funciones')
-            print(f'\tVariable {idName} ya existe en {currFunc}\n')
+            raise NameError(f'Variable {idName} ya existe en {currFunc}')
         else:
             if currFunc == "global":
                 scope = 'global'
@@ -117,8 +114,7 @@ class Tables(Transformer):
         global currFunc
         currFunc = args[0].value
         if currFunc in dirFunc:
-            print('\nError: multiple declaracion de funciones')
-            print(f'\tFuncion {currFunc} ya existe\n')
+            raise NameError(f'Funcion {currFunc} ya existe')
         else:
             dirFunc[currFunc] = {'type': currType, 'vars': {}, 'params': ''}
 
@@ -128,7 +124,7 @@ class Tables(Transformer):
         global currFuncCall
         currFuncCall = args[0].value
         if currFuncCall not in dirFunc:
-            print(f'\tError: la funcion: {currFuncCall} no existe\n')
+            raise NameError(f'La funcion: {currFuncCall} no existe\n')
 
         return Tree('llamada_name', args)
 
@@ -189,8 +185,7 @@ class Tables(Transformer):
         varList = dirFunc[currFunc]['vars']
         idName = args[0].value
         if idName in varList:
-            print('Error: Multiple declaracion de variables')
-            print(f'Variable {args[0].value} ya existe en {currFunc}')
+            raise NameError(f'Variable {args[0].value} ya existe en {currFunc}')
         else:
             dirV = getNewDirV(currType, 'local')
             varList[idName] = [dirV, currType]
@@ -318,7 +313,6 @@ class Tables(Transformer):
         var = args[0].value
         varDir = dirFunc[currFunc]['vars'][var][0]
         generateLeeVariableQuad(varDir)
-        # Falta leer y asignar valor a la variable
         return Tree('lee_variable', args)
 
     def string_salida(self, args):
@@ -341,7 +335,7 @@ class Tables(Transformer):
         if pilaTipos.top() == "bool":
             generateDecisionQuad()
         else:
-            print("Error: Type mismatch")
+            raise TypeError("Expected bool result")
 
         return Tree('decision_exp', args)
 
@@ -361,7 +355,7 @@ class Tables(Transformer):
         if pilaTipos.top() == "bool":
             generateDecisionQuad()
         else:
-            print("Error: Type mismatch")
+            raise TypeError("Expected bool result")
         return Tree('haz', args)
 
     def mientras_bloque(self, args):
@@ -377,8 +371,7 @@ class Tables(Transformer):
         varList = dirFunc[currFunc]['vars']
         idName = args[0].value
         if idName not in varList:
-            print('Error: Variable no declarada')
-            print(f'Variable {args[0].value} no existe en {currFunc}')
+            raise NameError(f'Variable {args[0].value} no existe en {currFunc}')
         else:
             var = dirFunc[currFunc]['vars'][idName][0]
             varType = dirFunc[currFunc]['vars'][idName][1]
@@ -400,7 +393,7 @@ class Tables(Transformer):
         if pilaTipos.top() == "bool":
             generateDecisionQuad()
         else:
-            print("Error: Type mismatch")
+            raise TypeError("Expected bool result")
         return Tree('hacer', args)
 
     def desde_bloque(self, args):

@@ -65,7 +65,7 @@ def generateQuad(currFunc):
             bTempCount += 1
         quadCount += 1
     else:
-        print("Error: Type mismatch")
+        raise TypeError(f'Cannot apply {oper} to {leftType} and {rightType}')
 
 def generateAssigmentQuad():
     res = pilaVariables.pop()
@@ -74,7 +74,6 @@ def generateAssigmentQuad():
     varType = pilaTipos.pop()
     oper = pilaOperadores.pop()
     result_type = Semantics().get_type(varType, resType, oper)
-    print(varType, resType, oper, result_type)
     if(result_type != 'ERROR'):
         global quadCount
         codigoOper = tablaOperadores[oper]
@@ -84,7 +83,7 @@ def generateAssigmentQuad():
         pilaVariables.push(var)
         pilaTipos.push(varType)
     else:
-        print("Error: Type mismatch")
+        raise TypeError(f'Cannot apply {oper} to {varType} and {resType}')
 
 def generateDecisionQuad():
     global quadCount
@@ -159,7 +158,7 @@ def generateDesdeQuad(currFunc):
             bTempCount += 1
         quadCount += 1
     else:
-        print("Error: Type mismatch")
+        raise TypeError(f'Cannot apply <= to {varType} and {resType}')
 
 def generateDesdeFinQuad(currFunc, right, rightType):
     var = pilaVariables.pop()
@@ -188,7 +187,7 @@ def generateDesdeFinQuad(currFunc, right, rightType):
         iTempCount += 1
         quadCount += 1
     else:
-        print("Error: Type mismatch")
+        raise TypeError(f'Cannot apply + to {varType} and {rightType}')
 
 def generateLeeVariableQuad(varDir):
     global quadCount
@@ -255,9 +254,9 @@ def generateParamQuad():
             quadCount += 1
             paramCount += 1
         else:
-            print('Error: param type mismatch')
+            raise TypeError(f'Expected {currParams[paramCount]} and received {varType[0]}')
     else:
-        print('Error: param count mismatch')
+        raise Exception(f'Expected {paramCount} params and received {len(currParams)+1}')
 
 def generateGoSubQuad(initAddress):
     global quadCount
@@ -268,7 +267,7 @@ def generateGoSubQuad(initAddress):
         cuadruplos.append(quad)
         quadCount += 1
     else:
-        print('Error: number of params mismatch')
+        raise Exception(f'Expected {len(currParams)} params and received {paramCount}')
         
 
 def getCurrentQuadCount():

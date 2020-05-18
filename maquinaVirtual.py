@@ -68,7 +68,7 @@ class MaquinaVirtual:
         tipo = int
       return self.ctes, dirVir, tipo
     else:
-      print('Error: OVERFLOW')
+      raise IndexError(f'Index {dirVir} out of range')
 
   def switch(self, codigoOp):
     # case '='
@@ -118,8 +118,3 @@ class MaquinaVirtual:
     while self.IP < len(self.quadruples):
       self.switch(self.quadruples[self.IP].op)
       self.IP += 1
-
-
-
-
-  
