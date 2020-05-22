@@ -117,6 +117,9 @@ class Tables(Transformer):
             raise NameError(f'Funcion {currFunc} ya existe')
         else:
             dirFunc[currFunc] = {'type': currType, 'vars': {}, 'params': ''}
+            if currType != 'void':
+                dirV = getNewDirV(currType, 'global')
+                dirFunc['global']['vars'][currFunc] = [dirV, currType]
 
         return Tree('func_name', args)
     
@@ -140,6 +143,10 @@ class Tables(Transformer):
     def fin_llamada(self, args):
         initAddress = dirFunc[currFuncCall]['start']
         generateGoSubQuad(initAddress)
+        if currFuncCall in dirFunc['global']['vars']:
+            dirV = dirFunc['global']['vars'][currFuncCall][0]
+            result_type = dirFunc['global']['vars'][currFuncCall][1]
+            generateFuncAssignmentQuad(dirV, result_type)
         return ('fin_llamada', args)
 
     # Clean up the function by restarting all virtual memory addresses
@@ -195,9 +202,7 @@ class Tables(Transformer):
         return Tree('param_name', args)
 
     def dec_var(self, args):
-        if currFunc == 'global':
-            dirFunc[currFunc]['varsCount'] = getVarsCount(dirFunc[currFunc]['vars'])
-        else:
+        if currFunc != 'global':
             dirFunc[currFunc]['varsCount'] = getVarsCount(dirFunc[currFunc]['vars'])
             quadCount = getCurrentQuadCount()
             dirFunc[currFunc]['start'] = quadCount
@@ -209,6 +214,7 @@ class Tables(Transformer):
         currFunc = 'global'
         quadCount = getCurrentQuadCount()
         dirFunc[currFunc]['start'] = quadCount
+        dirFunc[currFunc]['varsCount'] = getVarsCount(dirFunc[currFunc]['vars'])
         return Tree('principal', args)
 
     def tipo(self, args):
