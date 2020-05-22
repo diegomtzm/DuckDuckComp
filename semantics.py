@@ -6,7 +6,7 @@ class Semantics():
       'int' : { 
         # int, int
         'int' : {
-        '+' : 'int', '-' : 'int', '*' : 'int', '/' : 'int', '=' : 'int',
+        '+' : 'int', '-' : 'int', '*' : 'int', '/' : 'float', '=' : 'int',
         '<' : 'bool', '<=' : 'bool', '>' : 'bool', '>=' : 'bool', '!=' : 'bool', '==' : 'bool'
         },
         # int, float
@@ -29,7 +29,7 @@ class Semantics():
       'float' : { 
         # float, int
         'int' : {
-        '+' : 'float', '-' : 'float', '*' : 'float', '/' : 'float', '=' : 'ERROR',
+        '+' : 'float', '-' : 'float', '*' : 'float', '/' : 'float', '=' : 'float',
         '<' : 'bool', '<=' : 'bool', '>' : 'bool', '>=' : 'bool', '!=' : 'bool', '==' : 'bool'
         },
         # float, float
@@ -84,12 +84,12 @@ class Semantics():
         },
         # bool, char
         'char' : {
-          '+' : 'char', '-' : 'ERROR', '*' : 'ERROR', '/' : 'ERROR', '=' : 'char',
-          '<' : 'bool', '<=' : 'bool', '>' : 'bool', '>=' : 'bool', '!=' : 'bool', '==' : 'bool'
+          '+' : 'ERROR', '-' : 'ERROR', '*' : 'ERROR', '/' : 'ERROR', '=' : 'ERROR',
+          '<' : 'ERROR', '<=' : 'ERROR', '>' : 'ERROR', '>=' : 'ERROR', '!=' : 'ERROR', '==' : 'ERROR'
         },
         # bool, bool
         'bool' : {
-          '+' : 'ERROR', '-' : 'ERROR', '*' : 'ERROR', '/' : 'ERROR', '=' : 'ERROR',
+          '+' : 'ERROR', '-' : 'ERROR', '*' : 'ERROR', '/' : 'ERROR', '=' : 'bool',
           '<' : 'ERROR', '<=' : 'ERROR', '>' : 'ERROR', '>=' : 'ERROR', '!=' : 'bool', '==' : 'bool'
         }
       }
@@ -100,7 +100,6 @@ class Semantics():
     while type(right) is not str:
       right = rightType[1]
     res = self.Semantics[leftType][right][oper]
-    print(leftType, right, oper, res)
     return res
 
 # Testing

@@ -15,12 +15,14 @@ ld_grammar = r"""
   tipo: INT
       | FLOAT
       | CHAR
+      | BOOL
   func: FUNCION t dec_func dec_var* bloque
   t: INT
    | FLOAT
    | CHAR
+   | BOOL
    | VOID
-  dec_func: func_name "(" params ")" ":"
+  dec_func: func_name "(" params? ")" ":"
 	func_name: ID
   params: tipo param_name "," params
       | tipo param_name
@@ -37,11 +39,15 @@ ld_grammar = r"""
   asignacion: variable igual expresion fin_asignacion
 	fin_asignacion: ";"
 	igual: IGUAL
-  variable : ID dimn? dimn?
+  variable: ID dimn? dimn?
   dimn: "[" expresion "]"
-  llamada: ID "(" params2 ")"
-  params2: expresion "," params2
-      | expresion
+  llamada: llamada_name inicio_llamada params2? fin_llamada
+  llamada_name: ID
+  inicio_llamada: "("
+  fin_llamada: ")"
+  params2: params_exp "," params2
+      | params_exp
+  params_exp: expresion
   retorno: REGRESA "(" retorno_expresion ")" ";"
   retorno_expresion: expresion
   lectura: LEE "(" lista_vars ")" ";"
@@ -50,13 +56,24 @@ ld_grammar = r"""
   lee_variable: ID dimn? dimn?
   escritura: ESCRIBE "(" salida ")" ";"
   salida: string_salida salida2?
-      | expresion salida2?
+      | expresion_salida salida2?
   salida2: "," salida
+  expresion_salida: expresion
   string_salida: STRING
-  decision: SI "(" expresion ")" ENTONCES bloque sino?
-  sino: SINO bloque
-  rep_cond: MIENTRAS "(" expresion ")" HAZ bloque
-  rep_no_cond: DESDE variable "=" expresion HASTA expresion HACER bloque
+  decision: SI "(" decision_exp ")" ENTONCES bloque sino_bloque?
+  decision_exp: expresion
+  sino_bloque: sino bloque
+  sino: SINO
+  rep_cond: mientras "(" expresion ")" haz mientras_bloque
+  mientras: MIENTRAS
+  haz: HAZ
+  mientras_bloque: bloque
+  rep_no_cond: DESDE asignacion_desde HASTA expresion hacer desde_bloque
+  hacer: HACER
+  desde_bloque: bloque
+  asignacion_desde: variable_desde igual asignacion_desde_fin
+  asignacion_desde_fin: expresion
+  variable_desde: ID
   expresion: termino op1?
   op1: adicion expresion
 	adicion: ADICION
@@ -77,14 +94,10 @@ ld_grammar = r"""
   op3: "||" exp_logica_or
   exp_logica_and: exp_comp op4?
   op4: "&" exp_logica_and
-  exp_comp: expresion op5 expresion
+  exp_comp: full_exp_comp
       | expresion
-  op5: ">"
-      | "<"
-      | ">="
-      | "<="
-      | "!="
-      | "=="
+  full_exp_comp: expresion op_comp expresion
+  op_comp: OPCOMP
 
   PROGRAMA: "Programa"
   PRINCIPAL: "principal"
@@ -92,6 +105,7 @@ ld_grammar = r"""
   INT: "int"
   FLOAT: "float"
   CHAR: "char"
+  BOOL: "bool"
   VOID: "void"
   FUNCION: "funcion"
   REGRESA: "regresa"
@@ -107,6 +121,7 @@ ld_grammar = r"""
   HACER: "hacer"
 	ADICION: "+" | "-"
 	PRODUCTO: "*" | "/"
+  OPCOMP: ">=" | "<=" | "!=" | "==" | ">" | "<"
 	IGUAL: "="
 	OPENPAR: "("
 	CLOSEPAR: ")"

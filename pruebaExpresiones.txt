@@ -3,10 +3,21 @@ var
   int a, b, c, f, g, h;
   float d, e;
 
+funcion int fact (int j, float k, float m, bool n):
+var int i;
+{ 
+  %% i = 2;
+  regresa(i);
+}
+
+funcion void inicia(int y, float z):
+var int x;
+{
+  %% x = 5;
+}
+
 principal() {
-  h = 3 + (2 - 1 * 3) - 1 + 20 / 2 * (2 + 2);
-  lee(a, b);
-  escribe("hola", 2+3);
-  regresa(a);
-  regresa(2+3);
+  a = 2 + 3;
+  d = 8;
+  escribe("hello world", 2 * 3 + (4 / 2));
 }
