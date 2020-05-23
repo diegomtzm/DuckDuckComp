@@ -204,10 +204,16 @@ class Tables(Transformer):
     def dec_var(self, args):
         if currFunc != 'global':
             dirFunc[currFunc]['varsCount'] = getVarsCount(dirFunc[currFunc]['vars'])
+        
+        return Tree('dec_var', args)
+
+    def dec_func(self, args):
+        if currFunc != 'global':
+            dirFunc[currFunc]['varsCount'] = getVarsCount(dirFunc[currFunc]['vars'])
             quadCount = getCurrentQuadCount()
             dirFunc[currFunc]['start'] = quadCount
         
-        return Tree('dec_var', args)
+        return Tree('dec_func', args)
 
     def principal(self, args):
         global currFunc
@@ -277,7 +283,7 @@ class Tables(Transformer):
     def termino(self, args):
         if pilaOperadores.size() > 0:    
             top = pilaOperadores.top()
-            if top == "+" or top == "-":
+            if top in ["+", "-", "&", "||"]:
                 generateQuad(currFunc)
 
         return Tree('termino', args)
@@ -292,7 +298,7 @@ class Tables(Transformer):
     def full_exp_comp(self, args):
         if pilaOperadores.size() > 0:
             top = pilaOperadores.top()
-            if top in [">", "<", "<=", ">=", "!=", "=="]:
+            if top in [">", "<", "<=", ">=", "!=", "==", "&", "||"]:
                 generateQuad(currFunc)
         return Tree('full_exp_comp', args)
 
@@ -394,7 +400,7 @@ class Tables(Transformer):
         return Tree('asignacion_desde_fin', args)
 
     def hacer(self, args):
-        pushJump(-1)
+        pushJump(0)
         generateDesdeQuad(currFunc)
         if pilaTipos.top() == "bool":
             generateDecisionQuad()
@@ -417,3 +423,14 @@ class Tables(Transformer):
         generateGoToQuad(returnJump)
         rellenarQuad(end)
         return Tree('desde_bloque', args)
+
+    def oplogic(self, args):
+        print(f'args: {args[0].value}')
+        print(f'pVars: {pilaVariables.get()}')
+        global currFunc
+        op = args[0].value
+        # generateLogicOpsQuad(op, currFunc)
+        pilaOperadores.push(op)
+        return Tree('op3', args)
+        
+        

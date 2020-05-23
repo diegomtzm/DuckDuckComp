@@ -2,22 +2,30 @@ Programa expresiones;
 var
   int a, b, c, f, g, h;
   float d, e;
+  bool k, l, m;
 
-funcion int fact (int j, float k, float m, bool n):
-var int i;
+funcion int fact (int j):
+var int x;
 { 
-  %% i = 2;
-  regresa(i);
+  escribe(j);
+  si ((j > 0)) entonces {
+    regresa(fact(j-1));
+  } sino {
+    regresa(-2);
+  }
+  
 }
 
 funcion void inicia(int y, float z):
-var int x;
+var 
+  int x;
+  float s;
+  bool m, d, r;
 {
   %% x = 5;
 }
 
 principal() {
-  a = 2 + 3;
-  d = 8;
-  escribe("hello world", 2 * 3 + (4 / 2));
+  a = fact(3);
+  escribe(a);
 }

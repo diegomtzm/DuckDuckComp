@@ -114,7 +114,9 @@ def generateGoToQuad(returnJump):
 
 def rellenarQuad(numQuad):
     global quadCount
-    cuadruplos[numQuad][3] = quadCount
+    cuad = cuadruplos[numQuad]
+    cuad.res = quadCount
+    cuadruplos[numQuad] = cuad
 
 def pushJump(n=0):
     global quadCount
@@ -183,7 +185,7 @@ def generateDesdeFinQuad(currFunc, right, rightType):
 
         codigoOper = tablaOperadores['=']
         quad2 = Quadruple(codigoOper, dirVTemp, None, var)
-        cuadruplos.append(quad2.get())
+        cuadruplos.append(quad2)
         iTempCount += 1
         quadCount += 1
     else:
@@ -291,6 +293,34 @@ def generateFuncAssignmentQuad(dirV, result_type):
         cTempCount += 1
     elif result_type == 'bool':
         bTempCount += 1
+
+def generateLogicOpsQuad(op, currFunc):
+    right = pilaVariables.pop()
+    rightType = pilaTipos.pop()
+    left = pilaVariables.pop()
+    leftType = pilaTipos.pop()
+    result_type = Semantics().get_type(leftType, rightType, op)
+    if (result_type != "ERROR"):
+        global quadCount
+        global bTempCount
+        global cuadruplos
+
+        if currFunc == "global":
+            scope = 'globalTemp'
+        else:
+            scope = 'localTemp'
+
+        dirVTemp = getNewDirV(result_type, scope)
+        codigoOp = tablaOperadores[op]
+        quad = Quadruple(codigoOp, left, right, dirVTemp)
+        cuadruplos.append(quad)
+        quadCount += 1
+        pilaVariables.push(dirVTemp)
+        pilaTipos.push(result_type)
+        bTempCount += 1
+    else:
+        raise TypeError(f'Cannot apply {op} to {leftType} and {rightType}')
+
     
 def getCurrentQuadCount():
     global quadCount

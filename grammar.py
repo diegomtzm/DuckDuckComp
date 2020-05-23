@@ -83,17 +83,17 @@ ld_grammar = r"""
   factor: variable op_mat?
       | number
       | llamada
-      | open_par exp_logica_or close_par
+      | open_par exp_logica close_par
 	open_par: OPENPAR
 	close_par: CLOSEPAR
 	number: NUMBER
+      | SIGNED_NUMBER
   op_mat: "$"
       | "¡"
       | "?"
-  exp_logica_or: exp_logica_and op3?
-  op3: "||" exp_logica_or
-  exp_logica_and: exp_comp op4?
-  op4: "&" exp_logica_and
+  exp_logica: exp_comp op3?
+  op3: oplogic exp_logica
+  oplogic: OPLOGIC
   exp_comp: full_exp_comp
       | expresion
   full_exp_comp: expresion op_comp expresion
@@ -122,6 +122,7 @@ ld_grammar = r"""
 	ADICION: "+" | "-"
 	PRODUCTO: "*" | "/"
   OPCOMP: ">=" | "<=" | "!=" | "==" | ">" | "<"
+  OPLOGIC: "&" | "||"
 	IGUAL: "="
 	OPENPAR: "("
 	CLOSEPAR: ")"
@@ -131,6 +132,7 @@ ld_grammar = r"""
   %import common.WORD
   %import common.ESCAPED_STRING -> STRING
   %import common.NUMBER
+  %import common.SIGNED_NUMBER
   %import common.WS
   %ignore WS
   %ignore COMMENT
