@@ -13,6 +13,7 @@ iTempCount = 0
 fTempCount = 0
 cTempCount = 0
 bTempCount = 0
+pTempCount = 0
 paramCount = 0
 currParams = []
 currFuncCall = ''
@@ -28,7 +29,7 @@ class Quadruple:
     quad = [self.op, self.leftOp, self.rightOp, self.res]
     return quad
 
-def generateQuad(currFunc):
+def generateQuad(currFunc, pointer=False):
     rightOp = pilaVariables.pop()
     rightType = pilaTipos.pop()
     leftOp = pilaVariables.pop()
@@ -41,6 +42,7 @@ def generateQuad(currFunc):
         global fTempCount
         global cTempCount
         global bTempCount
+        global pTempCount
         global cuadruplos
 
         if currFunc == "global":
@@ -48,7 +50,11 @@ def generateQuad(currFunc):
         else:
             scope = 'localTemp'
 
-        dirVTemp = getNewDirV(result_type, scope)
+        if pointer:
+            dirVTemp = getNewDirV('pointer', scope)
+            pTempCount += 1
+        else:
+            dirVTemp = getNewDirV(result_type, scope)
         codigoOper = tablaOperadores[oper]
 
         quad = Quadruple(codigoOper, leftOp, rightOp, dirVTemp)
@@ -325,6 +331,15 @@ def generateLogicOpsQuad(op, currFunc):
     else:
         raise TypeError(f'Cannot apply {op} to {leftType} and {rightType}')
 
+def generateVerQuad(lim):
+    global quadCount
+    global cuadruplos
+    dirDim = pilaVariables.top()
+    codigoOp = tablaOperadores['ver']
+    quad = Quadruple(codigoOp, dirDim, None, lim)
+    cuadruplos.append(quad)
+    quadCount += 1
+
     
 def getCurrentQuadCount():
     global quadCount
@@ -335,7 +350,8 @@ def getTempCount():
     global fTempCount
     global cTempCount
     global bTempCount
-    tempCount = [iTempCount, fTempCount, cTempCount, bTempCount]
+    global pTempCount
+    tempCount = [iTempCount, fTempCount, cTempCount, bTempCount, pTempCount]
     return tempCount
 
 def resetTempCount():
@@ -343,4 +359,5 @@ def resetTempCount():
     global fTempCount
     global cTempCount
     global bTempCount
-    iTempCount, fTempCount, cTempCount, bTempCount = 0, 0, 0, 0
+    global pTempCount
+    iTempCount, fTempCount, cTempCount, bTempCount, pTempCount = 0, 0, 0, 0, 0

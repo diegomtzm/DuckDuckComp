@@ -13,6 +13,7 @@ currFunc = 'global'
 currType = ''
 currFuncCall = ''
 currVar = ''
+currDim = 0
 
 # Return the variable type
 def getTipo(var):
@@ -39,13 +40,13 @@ def getVarsCount(vars):
     iCount, fCount, cCount, bCount = 0, 0, 0, 0
     for _, val in vars.items():
         if val[1] == 'int':
-            iCount += 1
+            iCount += val['size']
         elif val[1] == 'float':
-            fCount += 1
+            fCount += val['size']
         elif val[1] == 'char':
-            cCount += 1
+            cCount += val['size']
         elif val[1] == 'bool':
-            bCount += 1
+            bCount += val['size']
     varsCount = [iCount, fCount, cCount, bCount]
     return varsCount
 
@@ -93,14 +94,10 @@ class Tables(Transformer):
 
     def id_name(self, args):
         global currVar
-        currVar = args[0].value
-        return Tree('id_name', args)
-
-    def id(self, args):
         global dirFunc
         global currFunc
         global currType
-        global currVar
+        currVar = args[0].value
         varList = dirFunc[currFunc]['vars']
         idName = currVar
         if idName in varList:
@@ -112,16 +109,47 @@ class Tables(Transformer):
                 scope = 'local'
 
             dirV = getNewDirV(currType, scope)
-            varList[idName] = {0: dirV, 1: currType, 'dim1': None}
+            varList[idName] = {0: dirV, 1: currType, 'size': 1, 'dim1': None}
             dirFunc[currFunc]['vars'] = varList
-
-        return Tree('id', args)
+        return Tree('id_name', args)
 
     def dim(self, args):
         global currVar
-        print(f'var: {currVar}')
-        print(f'd: {args[0].value}')
+        global currFunc
+        global dvcte
+        dim = args[0].value
+        if dim not in tablaCtes:
+            tablaCtes[dim] = dvcte
+            tablaCtesDir[dvcte] = dim
+            dvcte += 1
+        if dirFunc[currFunc]['vars'][currVar]['dim1'] == None:
+            dirFunc[currFunc]['vars'][currVar]['dim1'] = dim
+            dirFunc[currFunc]['vars'][currVar]['dim2'] = None
+        else:
+            dirFunc[currFunc]['vars'][currVar]['dim2'] = dim
         return Tree('dim', args)
+
+    def id(self, args):
+        if dirFunc[currFunc]['vars'][currVar]['dim1'] != None:
+            if currFunc == "global":
+                scope = 'global'
+            else:
+                scope = 'local'
+
+            varDir = getDirV(currVar, 'variable')
+            if varDir >= 50000:
+                scope += 'Temp'
+
+            varType = getTipo(currVar)
+            if dirFunc[currFunc]['vars'][currVar]['dim2'] == None:
+                # Array 1 dimension
+                n = int(dirFunc[currFunc]['vars'][currVar]['dim1'])
+            else: 
+                # Array 2 dimensions    
+                n = int(dirFunc[currFunc]['vars'][currVar]['dim1']) * int(dirFunc[currFunc]['vars'][currVar]['dim2'])
+            dirOffset(varType, scope, n-1)
+            dirFunc[currFunc]['vars'][currVar]['size'] = n
+        return Tree('id', args)
 
     def func_name(self, args):
         global currFunc
@@ -132,7 +160,7 @@ class Tables(Transformer):
             dirFunc[currFunc] = {'type': currType, 'vars': {}, 'params': ''}
             if currType != 'void':
                 dirV = getNewDirV(currType, 'global')
-                dirFunc['global']['vars'][currFunc] = {0: dirV, 1: currType, 'dim1': None}
+                dirFunc['global']['vars'][currFunc] = {0: dirV, 1: currType, 'size': 1, 'dim1': None}
 
         return Tree('func_name', args)
     
@@ -210,7 +238,7 @@ class Tables(Transformer):
             raise NameError(f'Variable {args[0].value} ya existe en {currFunc}')
         else:
             dirV = getNewDirV(currType, 'local')
-            varList[idName] = {0: dirV, 1: currType, 'dim1': None}
+            varList[idName] = {0: dirV, 1: currType, 'size': 1, 'dim1': None}
             dirFunc[currFunc]['vars'] = varList
             dirFunc[currFunc]['params'] += currType[0]
 
@@ -248,13 +276,72 @@ class Tables(Transformer):
         currType = args[0].value
         return Tree('t', args)
 
-    def variable(self, args):
+    def var_id(self, args):
         var = args[0].value
         tipo = getTipo(var)
         dirV = getDirV(var, 'variable')
         pilaVariables.push(dirV)
         pilaTipos.push(tipo)
-        return Tree('variable', args)
+        return Tree('var_id', args)
+
+    def var_dim(self, args):
+        pilaOperadores.pop()
+        return Tree('var_dim', args)
+    
+    def var_dim_id(self, args):
+        global currVar
+        currVar = args[0].value
+        pilaOperadores.push("[")
+        return Tree('var_dim_id', args)
+
+    def dimn(self, args):
+        global currDim
+        global currFunc
+        global dvcte
+        if currDim == 0:
+            lim = dirFunc[currFunc]['vars'][currVar]['dim1']
+            dirLim = tablaCtes[lim]
+            generateVerQuad(dirLim)
+            if dirFunc[currFunc]['vars'][currVar]['dim2'] != None:
+                currDim = 1
+                dim2 = dirFunc[currFunc]['vars'][currVar]['dim2']
+                dirDim2 = tablaCtes[dim2]
+                pilaVariables.push(dirDim2)
+                pilaTipos.push('int')
+                pilaOperadores.push('*')
+                generateQuad(currFunc)
+            else:
+                dirBase = str(dirFunc[currFunc]['vars'][currVar][0])
+                tipoBase = dirFunc[currFunc]['vars'][currVar][1]
+                if dirBase not in tablaCtes:
+                    tablaCtes[dirBase] = dvcte
+                    tablaCtesDir[dvcte] = dirBase
+                    dvcte += 1
+                pilaVariables.push(tablaCtes[dirBase])
+                pilaTipos.push(tipoBase)
+                pilaOperadores.push('+')
+                generateQuad(currFunc, True)
+
+        else:
+            currDim = 0
+            lim = dirFunc[currFunc]['vars'][currVar]['dim2']
+            dirLim = tablaCtes[lim]
+            generateVerQuad(dirLim)
+            pilaOperadores.push('+')
+            generateQuad(currFunc)
+            dirBase = str(dirFunc[currFunc]['vars'][currVar][0])
+            tipoBase = dirFunc[currFunc]['vars'][currVar][1]
+            if dirBase not in tablaCtes:
+                tablaCtes[dirBase] = dvcte
+                tablaCtesDir[dvcte] = dirBase
+                dvcte += 1
+            pilaVariables.push(tablaCtes[dirBase])
+            pilaTipos.push(tipoBase)
+            pilaOperadores.push('+')
+            generateQuad(currFunc, True)
+
+        
+        return Tree('dimn', args)
 
     def number(self, args):
         global dvcte
@@ -440,8 +527,6 @@ class Tables(Transformer):
         return Tree('desde_bloque', args)
 
     def oplogic(self, args):
-        print(f'args: {args[0].value}')
-        print(f'pVars: {pilaVariables.get()}')
         global currFunc
         op = args[0].value
         # generateLogicOpsQuad(op, currFunc)

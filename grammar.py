@@ -40,7 +40,11 @@ ld_grammar = r"""
   asignacion: variable igual expresion fin_asignacion
 	fin_asignacion: ";"
 	igual: IGUAL
-  variable: ID dimn? dimn?
+  variable: var_dim
+          | var_id
+  var_dim: var_dim_id dimn dimn?
+  var_dim_id: ID
+  var_id: ID
   dimn: "[" expresion "]"
   llamada: llamada_name inicio_llamada params2? fin_llamada
   llamada_name: ID

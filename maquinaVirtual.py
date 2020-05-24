@@ -36,6 +36,12 @@ class MaquinaVirtual:
     self.IPatCall = Stack()
     self.paramsCount = [0,0,0,0]
 
+  def checkPointer(self, dirV):
+    if dirV >= 70000:
+      memoria, dirOffset, _ = self.getMemory(dirV)
+      dirV = memoria[dirOffset]
+    return dirV
+
 #  tablaOperadores = {
 #   "+": 1, "-": 2, "*": 3, "/": 4, "=": 5, "<=": 6, ">=": 7, ">": 8, "<": 9, 
 #   "!=": 10, "==": 11, "&": 12, "||": 13, "lee": 14, "escribe": 15, "regresa": 16,
@@ -101,27 +107,33 @@ class MaquinaVirtual:
       else:
         tipo = int
       return self.ctes, dirVir, tipo
+    # POINTERS GLOBALTEMP
+    elif dirVir >= 70000 and dirVir < 72000:
+      return self.memGlobalTemp.pointers, dirVir - 70000, None
+    # POINTERS LOCALTEMP
+    elif dirVir >= 72000 and dirVir < 74000:
+      return self.memLocalTemp.pointers, dirVir - 72000, None
     else:
       raise IndexError(f'Index {dirVir} out of range')
 
   def switch(self, codigoOp):
     # case '='
     if codigoOp == 5: 
-      leftOp = self.quadruples[self.IP].leftOp
+      leftOp = self.checkPointer(self.quadruples[self.IP].leftOp)
       memoria, dirOffset, _ = self.getMemory(leftOp)
       valor = memoria[dirOffset]
 
-      res = self.quadruples[self.IP].res
+      res = self.checkPointer(self.quadruples[self.IP].res)
       memoria, dirOffset, _ = self.getMemory(res)
       memoria[dirOffset] = valor
     # case '<=', '>=', '>', '<', '!=', '==', '&', '||'
     elif codigoOp == 6 or codigoOp == 7 or codigoOp == 8 or codigoOp == 9 \
       or codigoOp == 10 or codigoOp == 11 or codigoOp == 12 or codigoOp == 13:
-      leftOp = self.quadruples[self.IP].leftOp
+      leftOp = self.checkPointer(self.quadruples[self.IP].leftOp)
       memoria, dirOffset, tipoL = self.getMemory(leftOp)
       valorLeft = memoria[dirOffset]
       
-      rightOp = self.quadruples[self.IP].rightOp
+      rightOp = self.checkPointer(self.quadruples[self.IP].rightOp)
       memoria, dirOffset, tipoR = self.getMemory(rightOp)
       valorRight = memoria[dirOffset]
 
@@ -132,12 +144,14 @@ class MaquinaVirtual:
       memoria[dirOffset] = compRes
     # case '+', '-', '*', '/'
     elif codigoOp == 1 or codigoOp == 2 or codigoOp == 3 or codigoOp == 4:
-      leftOp = self.quadruples[self.IP].leftOp
+      leftOp = self.checkPointer(self.quadruples[self.IP].leftOp)
       memoria, dirOffset, tipoL = self.getMemory(leftOp)
       valorLeft = memoria[dirOffset]
-      rightOp = self.quadruples[self.IP].rightOp
+
+      rightOp = self.checkPointer(self.quadruples[self.IP].rightOp)
       memoria, dirOffset, tipoR = self.getMemory(rightOp)
       valorRight = memoria[dirOffset]
+
       arithmeticRes = arithmeticOps[codigoOp](tipoL(valorLeft), tipoR(valorRight))
       res = self.quadruples[self.IP].res
       memoria, dirOffset, _ = self.getMemory(res)
@@ -145,7 +159,7 @@ class MaquinaVirtual:
       memoria[dirOffset] = arithmeticRes
     # case 'lee'
     elif codigoOp == 14:
-      res = self.quadruples[self.IP].res
+      res = self.checkPointer(self.quadruples[self.IP].res)
       memoria, dirOffset, tipo = self.getMemory(res)
       valor = input()
       memoria[dirOffset] = tipo(valor)
@@ -155,6 +169,7 @@ class MaquinaVirtual:
       if type(res) == str:
         print(res)
       else:
+        res = self.checkPointer(res)
         memoria, dirOffset, _ = self.getMemory(res)
         print(memoria[dirOffset])
     # case 'gotoF'
@@ -208,7 +223,7 @@ class MaquinaVirtual:
         dirV = 18000 + self.paramsCount[3]
         self.paramsCount[3] += 1
       
-      leftOp = self.quadruples[self.IP].leftOp
+      leftOp = self.checkPointer(self.quadruples[self.IP].leftOp)
       memoria, dirOffset, _ = self.getMemory(leftOp, 'old')
       valor = memoria[dirOffset]
       memoria, dirOffset, _ = self.getMemory(dirV)
@@ -220,7 +235,7 @@ class MaquinaVirtual:
       self.IP = dirGoSub - 1
     # case 'regresa'
     elif codigoOp == 16:
-      retDir = self.quadruples[self.IP].res
+      retDir = self.checkPointer(self.quadruples[self.IP].res)
       memoria, dirOffset, tipoRet = self.getMemory(retDir)
       retVal = memoria[dirOffset]
 
@@ -232,6 +247,18 @@ class MaquinaVirtual:
         self.IP = ip
       else:
         raise TypeError(f'Func {self.currFunc} is returning {tipoRet} instead of {tipoFunc}')
+    # case 'ver'
+    elif codigoOp == 24:
+      leftOp = self.quadruples[self.IP].leftOp
+      memoria, dirOffset, _ = self.getMemory(leftOp)
+      valor = int(memoria[dirOffset])
+
+      res = self.quadruples[self.IP].res
+      memoria, dirOffset, _ = self.getMemory(res)
+      lim = int(memoria[dirOffset])
+
+      if valor < 0 or valor >= lim:
+        raise IndexError(f'Index {valor} out of range')
 
   def execute(self):
     self.pilaFunciones.push((self.memLocal.get(), self.memLocalTemp.get()))
