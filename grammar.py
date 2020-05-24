@@ -10,7 +10,8 @@ ld_grammar = r"""
   dec_var2: tipo lista_ids ";"
   lista_ids: id "," lista_ids?
       | id
-	id: ID dim? dim?
+	id: id_name dim? dim?
+  id_name: ID
   dim: "[" NUMBER "]"
   tipo: INT
       | FLOAT

@@ -1,6 +1,7 @@
 Programa expresiones;
 var
   int a, b, c, f, g, h;
+  int A[3], B[5][4];
   float d, e;
   bool k, l, m;
 

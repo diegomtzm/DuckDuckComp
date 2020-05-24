@@ -12,6 +12,7 @@ dirFunc = {}
 currFunc = 'global'
 currType = ''
 currFuncCall = ''
+currVar = ''
 
 # Return the variable type
 def getTipo(var):
@@ -90,12 +91,18 @@ class Tables(Transformer):
 
         return Tree('start', args)
 
+    def id_name(self, args):
+        global currVar
+        currVar = args[0].value
+        return Tree('id_name', args)
+
     def id(self, args):
         global dirFunc
         global currFunc
         global currType
+        global currVar
         varList = dirFunc[currFunc]['vars']
-        idName = args[0].value
+        idName = currVar
         if idName in varList:
             raise NameError(f'Variable {idName} ya existe en {currFunc}')
         else:
@@ -105,10 +112,16 @@ class Tables(Transformer):
                 scope = 'local'
 
             dirV = getNewDirV(currType, scope)
-            varList[idName] = [dirV, currType]
+            varList[idName] = {0: dirV, 1: currType, 'dim1': None}
             dirFunc[currFunc]['vars'] = varList
 
         return Tree('id', args)
+
+    def dim(self, args):
+        global currVar
+        print(f'var: {currVar}')
+        print(f'd: {args[0].value}')
+        return Tree('dim', args)
 
     def func_name(self, args):
         global currFunc
@@ -119,7 +132,7 @@ class Tables(Transformer):
             dirFunc[currFunc] = {'type': currType, 'vars': {}, 'params': ''}
             if currType != 'void':
                 dirV = getNewDirV(currType, 'global')
-                dirFunc['global']['vars'][currFunc] = [dirV, currType]
+                dirFunc['global']['vars'][currFunc] = {0: dirV, 1: currType, 'dim1': None}
 
         return Tree('func_name', args)
     
@@ -197,7 +210,7 @@ class Tables(Transformer):
             raise NameError(f'Variable {args[0].value} ya existe en {currFunc}')
         else:
             dirV = getNewDirV(currType, 'local')
-            varList[idName] = [dirV, currType]
+            varList[idName] = {0: dirV, 1: currType, 'dim1': None}
             dirFunc[currFunc]['vars'] = varList
             dirFunc[currFunc]['params'] += currType[0]
 
