@@ -45,7 +45,7 @@ def getVarsCount(vars):
             cCount += 1
         elif val[1] == 'bool':
             bCount += 1
-    varsCount = str(iCount) + str(fCount) + str(cCount) + str(bCount)
+    varsCount = [iCount, fCount, cCount, bCount]
     return varsCount
 
 class Tables(Transformer):
@@ -134,6 +134,7 @@ class Tables(Transformer):
     def inicio_llamada(self, args):
         params = dirFunc[currFuncCall]['params']
         generateERAQuad(currFuncCall, params)
+        pilaOperadores.push("[")
         return ('inicio_llamada', args)
 
     def params_exp(self, args):
@@ -141,12 +142,13 @@ class Tables(Transformer):
         return ('params_exp', args)
 
     def fin_llamada(self, args):
+        pilaOperadores.pop()
         initAddress = dirFunc[currFuncCall]['start']
         generateGoSubQuad(initAddress)
         if currFuncCall in dirFunc['global']['vars']:
             dirV = dirFunc['global']['vars'][currFuncCall][0]
             result_type = dirFunc['global']['vars'][currFuncCall][1]
-            generateFuncAssignmentQuad(dirV, result_type)
+            generateFuncAssignmentQuad(dirV, result_type, currFunc)
         return ('fin_llamada', args)
 
     # Clean up the function by restarting all virtual memory addresses

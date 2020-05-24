@@ -271,14 +271,18 @@ def generateGoSubQuad(initAddress):
     else:
         raise Exception(f'Expected {len(currParams)} params and received {paramCount}')
 
-def generateFuncAssignmentQuad(dirV, result_type):
+def generateFuncAssignmentQuad(dirV, result_type, currFunc):
     global quadCount
     global cuadruplos
     global iTempCount
     global fTempCount
     global cTempCount
     global bTempCount
-    dirVTemp = getNewDirV(result_type, 'globalTemp')
+    if currFunc == 'global':
+        scope = 'globalTemp'
+    else:
+        scope = 'localTemp'
+    dirVTemp = getNewDirV(result_type, scope)
     codigoOp = tablaOperadores['=']
     quad = Quadruple(codigoOp, dirV, None, dirVTemp)
     cuadruplos.append(quad)
@@ -331,7 +335,7 @@ def getTempCount():
     global fTempCount
     global cTempCount
     global bTempCount
-    tempCount = str(iTempCount) + str(fTempCount) + str(cTempCount) + str(bTempCount)
+    tempCount = [iTempCount, fTempCount, cTempCount, bTempCount]
     return tempCount
 
 def resetTempCount():

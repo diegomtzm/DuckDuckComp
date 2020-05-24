@@ -7,13 +7,14 @@ var
 funcion int fact (int j):
 var int x;
 { 
+  escribe("FACT");
   escribe(j);
   si ((j > 0)) entonces {
-    regresa(fact(j-1));
+    j = j - 1;
+    regresa(fact(j));
   } sino {
     regresa(-2);
   }
-  
 }
 
 funcion void inicia(int y, float z):

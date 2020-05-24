@@ -29,9 +29,11 @@ class MaquinaVirtual:
     self.memGlobalTemp = MemoryMap(dirFunc['global']['tempCount'])
     self.memLocal = MemoryMap('0000')
     self.memLocalTemp = MemoryMap('0000')
+    self.memLocalOld = self.memLocal
+    self.memLocalTempOld = self.memLocalTemp
     self.currFunc = 'global'
     self.pilaFunciones = Stack()
-    self.IPatCall = -1
+    self.IPatCall = Stack()
     self.paramsCount = [0,0,0,0]
 
 #  tablaOperadores = {
@@ -39,7 +41,7 @@ class MaquinaVirtual:
 #   "!=": 10, "==": 11, "&": 12, "||": 13, "lee": 14, "escribe": 15, "regresa": 16,
 #   "goTo": 17, "goToF": 18, "endFunc": 19, "end": 20, "era": 21, "param": 22, "goSub": 23
 #  }
-  def getMemory(self, dirVir):
+  def getMemory(self, dirVir, version='current'):
     # GLOBAL
     if dirVir >= 1000 and dirVir < 4000:
       return self.memGlobal.ints, dirVir - 1000, int
@@ -50,14 +52,22 @@ class MaquinaVirtual:
     elif dirVir >= 9000 and dirVir < 10000:
       return self.memGlobal.bools, dirVir - 9000, bool
     # LOCAL
-    elif dirVir >= 10000 and dirVir < 13000:
+    elif dirVir >= 10000 and dirVir < 13000 and version == 'current': 
       return self.memLocal.ints, dirVir - 10000, int
-    elif dirVir >= 13000 and dirVir < 16000:
+    elif dirVir >= 13000 and dirVir < 16000 and version == 'current': 
       return self.memLocal.floats, dirVir - 13000, float
-    elif dirVir >= 16000 and dirVir < 18000:
+    elif dirVir >= 16000 and dirVir < 18000 and version == 'current': 
       return self.memLocal.chars, dirVir - 16000, str
-    elif dirVir >= 18000 and dirVir < 19000:
+    elif dirVir >= 18000 and dirVir < 19000 and version == 'current': 
       return self.memLocal.bools, dirVir - 18000, bool
+    elif dirVir >= 10000 and dirVir < 13000 and version == 'old': 
+      return self.memLocalOld.ints, dirVir - 10000, int
+    elif dirVir >= 13000 and dirVir < 16000 and version == 'old': 
+      return self.memLocalOld.floats, dirVir - 13000, float
+    elif dirVir >= 16000 and dirVir < 18000 and version == 'old': 
+      return self.memLocalOld.chars, dirVir - 16000, str
+    elif dirVir >= 18000 and dirVir < 19000 and version == 'old': 
+      return self.memLocalOld.bools, dirVir - 18000, bool
     # GLOBALTEMP
     elif dirVir >= 50000 and dirVir < 52000:
       return self.memGlobalTemp.ints, dirVir - 50000, int
@@ -68,14 +78,22 @@ class MaquinaVirtual:
     elif dirVir >= 56000 and dirVir < 58000:
       return self.memGlobalTemp.bools, dirVir - 56000, bool
     # LOCALTEMP
-    elif dirVir >= 58000 and dirVir < 60000:
+    elif dirVir >= 58000 and dirVir < 60000 and version == 'current':
       return self.memLocalTemp.ints, dirVir - 58000, int
-    elif dirVir >= 60000 and dirVir < 62000:
+    elif dirVir >= 60000 and dirVir < 62000 and version == 'current':
       return self.memLocalTemp.floats, dirVir - 60000, float
-    elif dirVir >= 62000 and dirVir < 64000:
+    elif dirVir >= 62000 and dirVir < 64000 and version == 'current':
       return self.memLocalTemp.chars, dirVir - 62000, str
-    elif dirVir >= 64000 and dirVir < 66000:
+    elif dirVir >= 64000 and dirVir < 66000 and version == 'current':
       return self.memLocalTemp.bools, dirVir - 64000, bool
+    elif dirVir >= 58000 and dirVir < 60000 and version == 'old':
+      return self.memLocalTempOld.ints, dirVir - 58000, int
+    elif dirVir >= 60000 and dirVir < 62000 and version == 'old':
+      return self.memLocalTempOld.floats, dirVir - 60000, float
+    elif dirVir >= 62000 and dirVir < 64000 and version == 'old':
+      return self.memLocalTempOld.chars, dirVir - 62000, str
+    elif dirVir >= 64000 and dirVir < 66000 and version == 'old':
+      return self.memLocalTempOld.bools, dirVir - 64000, bool
     # CTES
     elif dirVir >= 66000 and dirVir < 68000:
       if '.' in self.ctes[dirVir]:
@@ -95,10 +113,7 @@ class MaquinaVirtual:
 
       res = self.quadruples[self.IP].res
       memoria, dirOffset, _ = self.getMemory(res)
-      print(f'memoria: {memoria}')
-      print(f'dirOffset: {dirOffset}')
       memoria[dirOffset] = valor
-      print(f'res: {memoria}')
     # case '<=', '>=', '>', '<', '!=', '==', '&', '||'
     elif codigoOp == 6 or codigoOp == 7 or codigoOp == 8 or codigoOp == 9 \
       or codigoOp == 10 or codigoOp == 11 or codigoOp == 12 or codigoOp == 13:
@@ -120,11 +135,9 @@ class MaquinaVirtual:
       leftOp = self.quadruples[self.IP].leftOp
       memoria, dirOffset, tipoL = self.getMemory(leftOp)
       valorLeft = memoria[dirOffset]
-      
       rightOp = self.quadruples[self.IP].rightOp
       memoria, dirOffset, tipoR = self.getMemory(rightOp)
       valorRight = memoria[dirOffset]
-      print(self.pilaFunciones.get())
       arithmeticRes = arithmeticOps[codigoOp](tipoL(valorLeft), tipoR(valorRight))
       res = self.quadruples[self.IP].res
       memoria, dirOffset, _ = self.getMemory(res)
@@ -136,7 +149,6 @@ class MaquinaVirtual:
       memoria, dirOffset, tipo = self.getMemory(res)
       valor = input()
       memoria[dirOffset] = tipo(valor)
-      print(f'res: {memoria}')
     # case 'escribe'
     elif codigoOp == 15:
       res = self.quadruples[self.IP].res
@@ -160,14 +172,16 @@ class MaquinaVirtual:
     # case 'era'
     elif codigoOp == 21:
       self.currFunc = self.quadruples[self.IP].leftOp
-      memLocal = self.memLocal
-      memLocalTemp = self.memLocalTemp
-      self.pilaFunciones.push((memLocal, memLocalTemp))
+      self.memLocalOld = self.memLocal
+      self.memLocalTempOld = self.memLocalTemp
+      self.pilaFunciones.push((self.memLocalOld.get(), self.memLocalTempOld.get()))
+      self.paramsCount = [0,0,0,0]
       self.memLocal = MemoryMap(self.dirFunc[self.currFunc]['varsCount'])
       self.memLocalTemp = MemoryMap(self.dirFunc[self.currFunc]['tempCount'])
     # case 'endFunc'
     elif codigoOp == 19:
-      self.IP = self.IPatCall
+      ip = self.IPatCall.pop()
+      self.IP = ip
       memLocal = self.memLocal
       memLocalTemp = self.memLocalTemp
       del memLocal
@@ -175,9 +189,6 @@ class MaquinaVirtual:
       self.pilaFunciones.pop()
       self.memLocal = self.pilaFunciones.top()[0]
       self.memLocalTemp = self.pilaFunciones.top()[1]
-      self.paramsCount = '0000'
-      print(self.memLocal.get())
-      print(self.memLocalTemp.get())
     # case 'param'
     elif codigoOp == 22:
       params = self.dirFunc[self.currFunc]['params']
@@ -185,26 +196,26 @@ class MaquinaVirtual:
       paramType = params[paramNum]
       dirV = -1
       if paramType == 'i':
-        dirV = 10000 + int(self.paramsCount[0])
+        dirV = 10000 + self.paramsCount[0]
         self.paramsCount[0] += 1
       elif paramType == 'f':
-        dirV = 13000 + int(self.paramsCount[1])
+        dirV = 13000 + self.paramsCount[1]
         self.paramsCount[1] += 1
       elif paramType == 'c':
-        dirV = 16000 + int(self.paramsCount[2])
+        dirV = 16000 + self.paramsCount[2]
         self.paramsCount[2] += 1
       elif paramType == 'b':
-        dirV = 18000 + int(self.paramsCount[3])
+        dirV = 18000 + self.paramsCount[3]
         self.paramsCount[3] += 1
       
       leftOp = self.quadruples[self.IP].leftOp
-      memoria, dirOffset, _ = self.getMemory(leftOp)
+      memoria, dirOffset, _ = self.getMemory(leftOp, 'old')
       valor = memoria[dirOffset]
       memoria, dirOffset, _ = self.getMemory(dirV)
       memoria[dirOffset] = valor
     # case 'goSub'
     elif codigoOp == 23:
-      self.IPatCall = self.IP
+      self.IPatCall.push(self.IP)
       dirGoSub = self.quadruples[self.IP].res
       self.IP = dirGoSub - 1
     # case 'regresa'
@@ -217,11 +228,13 @@ class MaquinaVirtual:
       memoria, dirOffset, tipoFunc = self.getMemory(res)
       if tipoRet == tipoFunc:
         memoria[dirOffset] = retVal
+        ip = self.IPatCall.pop()
+        self.IP = ip
       else:
         raise TypeError(f'Func {self.currFunc} is returning {tipoRet} instead of {tipoFunc}')
 
   def execute(self):
-    self.pilaFunciones.push(([[],[],[],[]], [[],[],[],[]]))
+    self.pilaFunciones.push((self.memLocal.get(), self.memLocalTemp.get()))
     while self.IP < len(self.quadruples):
       self.switch(self.quadruples[self.IP].op)
       self.IP += 1
