@@ -13,6 +13,7 @@ currFunc = 'global'
 currType = ''
 currFuncCall = ''
 currVar = ''
+pilaVarDim = Stack()
 currDim = 0
 
 # Return the variable type
@@ -286,11 +287,14 @@ class Tables(Transformer):
 
     def var_dim(self, args):
         pilaOperadores.pop()
+        pilaVarDim.pop()
         return Tree('var_dim', args)
     
     def var_dim_id(self, args):
         global currVar
+        global pilaVarDim
         currVar = args[0].value
+        pilaVarDim.push(currVar)
         pilaOperadores.push("[")
         return Tree('var_dim_id', args)
 
@@ -298,21 +302,22 @@ class Tables(Transformer):
         global currDim
         global currFunc
         global dvcte
+        var = pilaVarDim.top()
         if currDim == 0:
-            lim = dirFunc[currFunc]['vars'][currVar]['dim1']
+            lim = dirFunc[currFunc]['vars'][var]['dim1']
             dirLim = tablaCtes[lim]
             generateVerQuad(dirLim)
-            if dirFunc[currFunc]['vars'][currVar]['dim2'] != None:
+            if dirFunc[currFunc]['vars'][var]['dim2'] != None:
                 currDim = 1
-                dim2 = dirFunc[currFunc]['vars'][currVar]['dim2']
+                dim2 = dirFunc[currFunc]['vars'][var]['dim2']
                 dirDim2 = tablaCtes[dim2]
                 pilaVariables.push(dirDim2)
                 pilaTipos.push('int')
                 pilaOperadores.push('*')
                 generateQuad(currFunc)
             else:
-                dirBase = str(dirFunc[currFunc]['vars'][currVar][0])
-                tipoBase = dirFunc[currFunc]['vars'][currVar][1]
+                dirBase = str(dirFunc[currFunc]['vars'][var][0])
+                tipoBase = dirFunc[currFunc]['vars'][var][1]
                 if dirBase not in tablaCtes:
                     tablaCtes[dirBase] = dvcte
                     tablaCtesDir[dvcte] = dirBase
@@ -324,13 +329,13 @@ class Tables(Transformer):
 
         else:
             currDim = 0
-            lim = dirFunc[currFunc]['vars'][currVar]['dim2']
+            lim = dirFunc[currFunc]['vars'][var]['dim2']
             dirLim = tablaCtes[lim]
             generateVerQuad(dirLim)
             pilaOperadores.push('+')
             generateQuad(currFunc)
-            dirBase = str(dirFunc[currFunc]['vars'][currVar][0])
-            tipoBase = dirFunc[currFunc]['vars'][currVar][1]
+            dirBase = str(dirFunc[currFunc]['vars'][var][0])
+            tipoBase = dirFunc[currFunc]['vars'][var][1]
             if dirBase not in tablaCtes:
                 tablaCtes[dirBase] = dvcte
                 tablaCtesDir[dvcte] = dirBase

@@ -249,7 +249,7 @@ class MaquinaVirtual:
         raise TypeError(f'Func {self.currFunc} is returning {tipoRet} instead of {tipoFunc}')
     # case 'ver'
     elif codigoOp == 24:
-      leftOp = self.quadruples[self.IP].leftOp
+      leftOp = self.checkPointer(self.quadruples[self.IP].leftOp)
       memoria, dirOffset, _ = self.getMemory(leftOp)
       valor = int(memoria[dirOffset])
 
