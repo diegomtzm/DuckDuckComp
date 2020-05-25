@@ -35,6 +35,7 @@ class MaquinaVirtual:
     self.pilaFunciones = Stack()
     self.IPatCall = Stack()
     self.paramsCount = [0,0,0,0]
+    self.inParams = False
 
   def checkPointer(self, dirV):
     if dirV >= 70000:
@@ -129,33 +130,42 @@ class MaquinaVirtual:
     # case '<=', '>=', '>', '<', '!=', '==', '&', '||'
     elif codigoOp == 6 or codigoOp == 7 or codigoOp == 8 or codigoOp == 9 \
       or codigoOp == 10 or codigoOp == 11 or codigoOp == 12 or codigoOp == 13:
+      if self.inParams:
+        mem = 'old'
+      else:
+        mem = 'current'
+
       leftOp = self.checkPointer(self.quadruples[self.IP].leftOp)
-      memoria, dirOffset, tipoL = self.getMemory(leftOp)
+      memoria, dirOffset, tipoL = self.getMemory(leftOp, mem)
       valorLeft = memoria[dirOffset]
       
       rightOp = self.checkPointer(self.quadruples[self.IP].rightOp)
-      memoria, dirOffset, tipoR = self.getMemory(rightOp)
+      memoria, dirOffset, tipoR = self.getMemory(rightOp, mem)
       valorRight = memoria[dirOffset]
 
       compRes = compOps[codigoOp](tipoL(valorLeft), tipoR(valorRight))
       res = self.quadruples[self.IP].res
-      memoria, dirOffset, _ = self.getMemory(res)
+      memoria, dirOffset, _ = self.getMemory(res, mem)
 
       memoria[dirOffset] = compRes
     # case '+', '-', '*', '/'
     elif codigoOp == 1 or codigoOp == 2 or codigoOp == 3 or codigoOp == 4:
+      if self.inParams:
+        mem = 'old'
+      else:
+        mem = 'current'
+
       leftOp = self.checkPointer(self.quadruples[self.IP].leftOp)
-      memoria, dirOffset, tipoL = self.getMemory(leftOp)
+      memoria, dirOffset, tipoL = self.getMemory(leftOp, mem)
       valorLeft = memoria[dirOffset]
 
       rightOp = self.checkPointer(self.quadruples[self.IP].rightOp)
-      memoria, dirOffset, tipoR = self.getMemory(rightOp)
+      memoria, dirOffset, tipoR = self.getMemory(rightOp, mem)
       valorRight = memoria[dirOffset]
 
       arithmeticRes = arithmeticOps[codigoOp](tipoL(valorLeft), tipoR(valorRight))
       res = self.quadruples[self.IP].res
-      memoria, dirOffset, _ = self.getMemory(res)
-
+      memoria, dirOffset, _ = self.getMemory(res, mem)
       memoria[dirOffset] = arithmeticRes
     # case 'lee'
     elif codigoOp == 14:
@@ -193,6 +203,7 @@ class MaquinaVirtual:
       self.paramsCount = [0,0,0,0]
       self.memLocal = MemoryMap(self.dirFunc[self.currFunc]['varsCount'])
       self.memLocalTemp = MemoryMap(self.dirFunc[self.currFunc]['tempCount'])
+      self.inParams = True
     # case 'endFunc'
     elif codigoOp == 19:
       ip = self.IPatCall.pop()
@@ -233,6 +244,7 @@ class MaquinaVirtual:
       self.IPatCall.push(self.IP)
       dirGoSub = self.quadruples[self.IP].res
       self.IP = dirGoSub - 1
+      self.inParams = False
     # case 'regresa'
     elif codigoOp == 16:
       retDir = self.checkPointer(self.quadruples[self.IP].res)
