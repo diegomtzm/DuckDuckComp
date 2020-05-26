@@ -199,10 +199,10 @@ class MaquinaVirtual:
       self.currFunc = self.quadruples[self.IP].leftOp
       self.memLocalOld = self.memLocal
       self.memLocalTempOld = self.memLocalTemp
-      self.pilaFunciones.push((self.memLocalOld.get(), self.memLocalTempOld.get()))
       self.paramsCount = [0,0,0,0]
       self.memLocal = MemoryMap(self.dirFunc[self.currFunc]['varsCount'])
       self.memLocalTemp = MemoryMap(self.dirFunc[self.currFunc]['tempCount'])
+      self.pilaFunciones.push((self.memLocal, self.memLocalTemp))
       self.inParams = True
     # case 'endFunc'
     elif codigoOp == 19:
@@ -257,6 +257,13 @@ class MaquinaVirtual:
         memoria[dirOffset] = retVal
         ip = self.IPatCall.pop()
         self.IP = ip
+        memLocal = self.memLocal
+        memLocalTemp = self.memLocalTemp
+        del memLocal
+        del memLocalTemp
+        self.pilaFunciones.pop()
+        self.memLocal = self.pilaFunciones.top()[0]
+        self.memLocalTemp = self.pilaFunciones.top()[1]
       else:
         raise TypeError(f'Func {self.currFunc} is returning {tipoRet} instead of {tipoFunc}')
     # case 'ver'
@@ -273,7 +280,7 @@ class MaquinaVirtual:
         raise IndexError(f'Index {valor} out of range')
 
   def execute(self):
-    self.pilaFunciones.push((self.memLocal.get(), self.memLocalTemp.get()))
+    self.pilaFunciones.push((self.memLocal, self.memLocalTemp))
     while self.IP < len(self.quadruples):
       self.switch(self.quadruples[self.IP].op)
       self.IP += 1

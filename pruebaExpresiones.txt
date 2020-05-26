@@ -11,8 +11,8 @@ var int x;
   escribe("FACT");
   escribe(j);
   si ((j > 0)) entonces {
-    j = j - 1;
-    regresa(fact(j));
+    x = 3;
+    regresa(fact(j-x));
   } sino {
     regresa(-2);
   }
@@ -24,12 +24,16 @@ var
   float s;
   bool m, d, r;
 {
-  %% x = 5;
+  escribe("INICIA");
+  escribe(y, z);
+  x = fact(9);
+  escribe("INICIA 2");
+  escribe(y+z+x);
 }
 
 principal() {
-  A[0] = 30;
-  A[1] = 20;
-  A[0] = A[1];
-  escribe(A[0]);
+  b = 12 + 4;
+  a = fact(b+5);
+  inicia(8, 2.2);
+  escribe(a);
 }
