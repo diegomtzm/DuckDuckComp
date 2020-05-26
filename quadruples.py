@@ -6,6 +6,7 @@ pilaOperadores = Stack()
 pilaSaltos = Stack()
 pilaVariables = Stack()
 pilaTipos = Stack()
+pilaSizes = Stack()
 
 cuadruplos = []
 quadCount = 0
@@ -73,7 +74,7 @@ def generateQuad(currFunc, pointer=False):
     else:
         raise TypeError(f'Cannot apply {oper} to {leftType} and {rightType}')
 
-def generateAssigmentQuad():
+def generateAssigmentQuad(size=1):
     res = pilaVariables.pop()
     resType = pilaTipos.pop()
     var = pilaVariables.pop()
@@ -83,7 +84,7 @@ def generateAssigmentQuad():
     if(result_type != 'ERROR'):
         global quadCount
         codigoOper = tablaOperadores[oper]
-        quad = Quadruple(codigoOper, res, None, var)
+        quad = Quadruple(codigoOper, res, size, var)
         cuadruplos.append(quad)
         quadCount += 1
         pilaVariables.push(var)
@@ -290,7 +291,7 @@ def generateFuncAssignmentQuad(dirV, result_type, currFunc):
         scope = 'localTemp'
     dirVTemp = getNewDirV(result_type, scope)
     codigoOp = tablaOperadores['=']
-    quad = Quadruple(codigoOp, dirV, None, dirVTemp)
+    quad = Quadruple(codigoOp, dirV, 1, dirVTemp)
     cuadruplos.append(quad)
     quadCount += 1
     pilaVariables.push(dirVTemp)

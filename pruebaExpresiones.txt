@@ -1,6 +1,6 @@
 Programa expresiones;
 var
-  int A[4], B[5][4];
+  int A[5], B[5][4], C[5][4];
   int a, b, c, f, g, h;
   float d, e;
   bool k, l, m;
@@ -36,4 +36,10 @@ principal() {
   a = fact(b+5);
   inicia(8, 2.2);
   escribe(a);
+  escribe("----------------------");
+  C[3][2] = 15;
+  B[3][2] = -3;
+  escribe(B[3][2]);
+  B = C;
+  escribe(B[3][2]);
 }

@@ -121,12 +121,16 @@ class MaquinaVirtual:
     # case '='
     if codigoOp == 5: 
       leftOp = self.checkPointer(self.quadruples[self.IP].leftOp)
-      memoria, dirOffset, _ = self.getMemory(leftOp)
-      valor = memoria[dirOffset]
+      memoriaL, dirOffsetL, _ = self.getMemory(leftOp)
 
       res = self.checkPointer(self.quadruples[self.IP].res)
-      memoria, dirOffset, _ = self.getMemory(res)
-      memoria[dirOffset] = valor
+      memoriaR, dirOffsetR, _ = self.getMemory(res)
+
+      size = self.quadruples[self.IP].rightOp
+      for i in range(0,size):
+        valor = memoriaL[dirOffsetL+i]
+        memoriaR[dirOffsetR+i] = valor
+
     # case '<=', '>=', '>', '<', '!=', '==', '&', '||'
     elif codigoOp == 6 or codigoOp == 7 or codigoOp == 8 or codigoOp == 9 \
       or codigoOp == 10 or codigoOp == 11 or codigoOp == 12 or codigoOp == 13:

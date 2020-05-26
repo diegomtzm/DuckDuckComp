@@ -281,8 +281,11 @@ class Tables(Transformer):
         var = args[0].value
         tipo = getTipo(var)
         dirV = getDirV(var, 'variable')
+        size = dirFunc[currFunc]['vars'][var]['size']
         pilaVariables.push(dirV)
         pilaTipos.push(tipo)
+        if size > 1:
+            pilaSizes.push(size)
         return Tree('var_id', args)
 
     def var_dim(self, args):
@@ -413,9 +416,22 @@ class Tables(Transformer):
         if pilaOperadores.size() > 0:
             top = pilaOperadores.top()
             if top == "=":
-                generateAssigmentQuad()
-                pilaVariables.pop()
-                pilaTipos.pop()
+                if pilaSizes.size() > 1:
+                    rightSize = pilaSizes.pop()
+                    leftSize = pilaSizes.pop()
+                    if rightSize == leftSize:
+                        generateAssigmentQuad(leftSize)
+                        pilaVariables.pop()
+                        pilaTipos.pop()
+                    else:
+                        raise RuntimeError(f'Can`t assign array of size {rightSize} to array of size {leftSize}')
+                elif pilaSizes.size() > 0:
+                    size = pilaSizes.pop()
+                    raise RuntimeError(f'Uncompatible sizes {size} vs 1')
+                else:
+                    generateAssigmentQuad()
+                    pilaVariables.pop()
+                    pilaTipos.pop()
         return Tree('fin_asignacion', args)
 
     def open_par(self, args):
