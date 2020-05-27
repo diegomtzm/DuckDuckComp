@@ -29,6 +29,10 @@ dvcte = 66000
 dvpg = 70000
 dvpl = 72000
 
+# Espacios de memoria virtual para variables booleanas
+dvtrue = 800
+dvfalse = 900 
+
 dirVirtual = {}
 dirVirtual['global'] = {
   'int': dvig,

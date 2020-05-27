@@ -88,9 +88,12 @@ ld_grammar = r"""
   factor: variable op_mat?
       | number
       | llamada
+      | boolean
       | open_par exp_logica close_par
 	open_par: OPENPAR
 	close_par: CLOSEPAR
+  boolean: TRUE
+      | FALSE
 	number: NUMBER
       | SIGNED_NUMBER
   op_mat: "$"
@@ -124,6 +127,8 @@ ld_grammar = r"""
   DESDE: "desde"
   HASTA: "hasta"
   HACER: "hacer"
+  TRUE: "True"
+  FALSE: "False"
 	ADICION: "+" | "-"
 	PRODUCTO: "*" | "/"
   OPCOMP: ">=" | "<=" | "!=" | "==" | ">" | "<"
