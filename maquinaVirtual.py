@@ -175,12 +175,15 @@ class MaquinaVirtual:
       memoriaL, dirOffsetL, tipoL = self.getMemory(leftOp, mem)
       rightOp = self.checkPointer(self.quadruples[self.IP].rightOp)
       memoriaR, dirOffsetR, tipoR = self.getMemory(rightOp, mem)
-      
+
+      res = [None] * size
       for i in range(0, size):
         valorLeft = memoriaL[dirOffsetL+i]
         valorRight = memoriaR[dirOffsetR+i]
         arithmeticRes = arithmeticOps[codigoOp](tipoL(valorLeft), tipoR(valorRight))
-        memoriaRes[dirOffsetRes+i] = arithmeticRes
+        res[i] = arithmeticRes
+      for i in range(0, size):
+        memoriaRes[dirOffsetRes+i] = res[i]
 
     # case 'lee'
     elif codigoOp == 14:
