@@ -6,7 +6,7 @@ pilaOperadores = Stack()
 pilaSaltos = Stack()
 pilaVariables = Stack()
 pilaTipos = Stack()
-pilaSizes = Stack()
+pilaDimensions = Stack()
 
 cuadruplos = []
 quadCount = 0

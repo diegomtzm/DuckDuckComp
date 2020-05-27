@@ -90,6 +90,10 @@ class Tables(Transformer):
             raise NameError('doble declaración de programa')
         else:
             dirFunc['global'] = {'type': 'program', 'vars': {}}
+            global dvcte
+            tablaCtes['1'] = dvcte
+            tablaCtesDir[dvcte] = '1'
+            dvcte += 1
 
         return Tree('start', args)
 
@@ -119,15 +123,18 @@ class Tables(Transformer):
         global currFunc
         global dvcte
         dim = args[0].value
-        if dim not in tablaCtes:
-            tablaCtes[dim] = dvcte
-            tablaCtesDir[dvcte] = dim
-            dvcte += 1
-        if dirFunc[currFunc]['vars'][currVar]['dim1'] == None:
-            dirFunc[currFunc]['vars'][currVar]['dim1'] = dim
-            dirFunc[currFunc]['vars'][currVar]['dim2'] = None
+        if dim > '0':
+            if dim not in tablaCtes:
+                tablaCtes[dim] = dvcte
+                tablaCtesDir[dvcte] = dim
+                dvcte += 1
+            if dirFunc[currFunc]['vars'][currVar]['dim1'] == None:
+                dirFunc[currFunc]['vars'][currVar]['dim1'] = dim
+                dirFunc[currFunc]['vars'][currVar]['dim2'] = '1'
+            else:
+                dirFunc[currFunc]['vars'][currVar]['dim2'] = dim
         else:
-            dirFunc[currFunc]['vars'][currVar]['dim2'] = dim
+            raise Exception('Can`t define arrays of size 0')
         return Tree('dim', args)
 
     def id(self, args):
@@ -142,12 +149,7 @@ class Tables(Transformer):
                 scope += 'Temp'
 
             varType = getTipo(currVar)
-            if dirFunc[currFunc]['vars'][currVar]['dim2'] == None:
-                # Array 1 dimension
-                n = int(dirFunc[currFunc]['vars'][currVar]['dim1'])
-            else: 
-                # Array 2 dimensions    
-                n = int(dirFunc[currFunc]['vars'][currVar]['dim1']) * int(dirFunc[currFunc]['vars'][currVar]['dim2'])
+            n = int(dirFunc[currFunc]['vars'][currVar]['dim1']) * int(dirFunc[currFunc]['vars'][currVar]['dim2'])
             dirOffset(varType, scope, n-1)
             dirFunc[currFunc]['vars'][currVar]['size'] = n
         return Tree('id', args)
@@ -285,7 +287,9 @@ class Tables(Transformer):
         pilaVariables.push(dirV)
         pilaTipos.push(tipo)
         if size > 1:
-            pilaSizes.push(size)
+            dim1 = int(dirFunc[currFunc]['vars'][var]['dim1'])
+            dim2 = int(dirFunc[currFunc]['vars'][var]['dim2'])
+            pilaDimensions.push((dim1, dim2))
         return Tree('var_id', args)
 
     def var_dim(self, args):
@@ -310,7 +314,7 @@ class Tables(Transformer):
             lim = dirFunc[currFunc]['vars'][var]['dim1']
             dirLim = tablaCtes[lim]
             generateVerQuad(dirLim)
-            if dirFunc[currFunc]['vars'][var]['dim2'] != None:
+            if dirFunc[currFunc]['vars'][var]['dim2'] != '1':
                 currDim = 1
                 dim2 = dirFunc[currFunc]['vars'][var]['dim2']
                 dirDim2 = tablaCtes[dim2]
@@ -416,18 +420,19 @@ class Tables(Transformer):
         if pilaOperadores.size() > 0:
             top = pilaOperadores.top()
             if top == "=":
-                if pilaSizes.size() > 1:
-                    rightSize = pilaSizes.pop()
-                    leftSize = pilaSizes.pop()
-                    if rightSize == leftSize:
-                        generateAssigmentQuad(leftSize)
+                if pilaDimensions.size() > 1:
+                    rightDims = pilaDimensions.pop()
+                    leftDims = pilaDimensions.pop()
+                    if rightDims == leftDims:
+                        size = rightDims[0] * rightDims[1]
+                        generateAssigmentQuad(size)
                         pilaVariables.pop()
                         pilaTipos.pop()
                     else:
-                        raise RuntimeError(f'Can`t assign array of size {rightSize} to array of size {leftSize}')
-                elif pilaSizes.size() > 0:
-                    size = pilaSizes.pop()
-                    raise RuntimeError(f'Uncompatible sizes {size} vs 1')
+                        raise RuntimeError(f'Can`t assign array of size {rightDims} to array of size {leftDims}')
+                elif pilaDimensions.size() > 0:
+                    dims = pilaDimensions.pop()
+                    raise RuntimeError(f'Uncompatible sizes {dims} vs 1')
                 else:
                     generateAssigmentQuad()
                     pilaVariables.pop()
@@ -535,12 +540,6 @@ class Tables(Transformer):
         end = pilaSaltos.pop()
         returnJump = pilaSaltos.pop()
         # cuadruplo k = k + 1;
-        if '1' not in tablaCtes:
-            global dvcte
-            tablaCtes['1'] = dvcte
-            tablaCtesDir[dvcte] = '1'
-            dvcte += 1
-
         dirV = getDirV('1', 'cte')
         generateDesdeFinQuad(currFunc, dirV, 'int')
         generateGoToQuad(returnJump)
@@ -550,8 +549,7 @@ class Tables(Transformer):
     def oplogic(self, args):
         global currFunc
         op = args[0].value
-        # generateLogicOpsQuad(op, currFunc)
+        generateLogicOpsQuad(op, currFunc)
         pilaOperadores.push(op)
         return Tree('op3', args)
-        
         
