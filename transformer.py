@@ -374,6 +374,20 @@ class Tables(Transformer):
         pilaTipos.push(tipo)
         return Tree('number', args)
 
+    def boolean(self, args):
+        global dvtrue
+        global dvfalse
+
+        var = args[0].value
+        if var == "True":
+            dirV = dvtrue
+        else:
+            dirV = dvfalse
+
+        pilaVariables.push(dirV)
+        pilaTipos.push('bool')
+        return Tree('boolean', args)
+
     def producto(self, args):
         oper = args[0].value
         pilaOperadores.push(oper)
@@ -398,14 +412,34 @@ class Tables(Transformer):
         if pilaOperadores.size() > 0:    
             top = pilaOperadores.top()
             if top in ["+", "-", "&", "||"]:
-                generateQuad(currFunc)
-
+                if pilaDimensions.size() > 1:
+                    rightDims = pilaDimensions.pop()
+                    leftDims = pilaDimensions.pop()
+                    if rightDims == leftDims:
+                        size = rightDims[0] * rightDims[1]
+                        generateQuad(currFunc, size=size)
+                        pilaDimensions.push(leftDims)
+                    else:
+                        raise RuntimeError(f'Can`t apply {top} between vars of size {rightDims} and {leftDims}')
+                elif pilaDimensions.size() > 0:
+                    dims = pilaDimensions.pop()
+                    raise RuntimeError(f'Uncompatible sizes {dims} vs 1')
+                else:
+                    generateQuad(currFunc)
         return Tree('termino', args)
 
     def factor(self, args):
         if pilaOperadores.size() > 0: 
             top = pilaOperadores.top()
             if top == "*" or top == "/":
+                if pilaDimensions.size() > 1:
+                    rightDims = pilaDimensions.pop()
+                    leftDims = pilaDimensions.pop()
+                    if leftDims[1] == rightDims[0]:
+                        generateQuad(currFunc, rightDims, leftDims)
+                        pilaDimensions.push(leftDims[0], rightDims[1])
+                    else:
+                        raise RuntimeError(f'Can`t apply {top} between vars of size {rightDims} and {leftDims}')
                 generateQuad(currFunc)
         return Tree('factor', args)
 
@@ -549,7 +583,6 @@ class Tables(Transformer):
     def oplogic(self, args):
         global currFunc
         op = args[0].value
-        generateLogicOpsQuad(op, currFunc)
         pilaOperadores.push(op)
         return Tree('op3', args)
         

@@ -30,7 +30,7 @@ class Quadruple:
     quad = [self.op, self.leftOp, self.rightOp, self.res]
     return quad
 
-def generateQuad(currFunc, pointer=False):
+def generateQuad(currFunc, pointer=False, size=1):
     rightOp = pilaVariables.pop()
     rightType = pilaTipos.pop()
     leftOp = pilaVariables.pop()
@@ -58,9 +58,14 @@ def generateQuad(currFunc, pointer=False):
             dirVTemp = getNewDirV(result_type, scope)
         codigoOper = tablaOperadores[oper]
 
+        if size > 1:
+            dirVTemp = (dirVTemp, size)
+            pilaVariables.push(dirVTemp[0])
+        else:
+            pilaVariables.push(dirVTemp)
+
         quad = Quadruple(codigoOper, leftOp, rightOp, dirVTemp)
         cuadruplos.append(quad)
-        pilaVariables.push(dirVTemp)
         pilaTipos.push(result_type)
         if result_type == 'int':
             iTempCount += 1
@@ -191,7 +196,7 @@ def generateDesdeFinQuad(currFunc, right, rightType):
         quadCount += 1
 
         codigoOper = tablaOperadores['=']
-        quad2 = Quadruple(codigoOper, dirVTemp, None, var)
+        quad2 = Quadruple(codigoOper, dirVTemp, 1, var)
         cuadruplos.append(quad2)
         iTempCount += 1
         quadCount += 1
@@ -304,33 +309,6 @@ def generateFuncAssignmentQuad(dirV, result_type, currFunc):
         cTempCount += 1
     elif result_type == 'bool':
         bTempCount += 1
-
-def generateLogicOpsQuad(op, currFunc):
-    right = pilaVariables.pop()
-    rightType = pilaTipos.pop()
-    left = pilaVariables.pop()
-    leftType = pilaTipos.pop()
-    result_type = Semantics().get_type(leftType, rightType, op)
-    if (result_type != "ERROR"):
-        global quadCount
-        global bTempCount
-        global cuadruplos
-
-        if currFunc == "global":
-            scope = 'globalTemp'
-        else:
-            scope = 'localTemp'
-
-        dirVTemp = getNewDirV(result_type, scope)
-        codigoOp = tablaOperadores[op]
-        quad = Quadruple(codigoOp, left, right, dirVTemp)
-        cuadruplos.append(quad)
-        quadCount += 1
-        pilaVariables.push(dirVTemp)
-        pilaTipos.push(result_type)
-        bTempCount += 1
-    else:
-        raise TypeError(f'Cannot apply {op} to {leftType} and {rightType}')
 
 def generateVerQuad(lim):
     global quadCount

@@ -114,6 +114,9 @@ class MaquinaVirtual:
     # POINTERS LOCALTEMP
     elif dirVir >= 72000 and dirVir < 74000:
       return self.memLocalTemp.pointers, dirVir - 72000, None
+    elif dirVir == 800 or dirVir == 900:
+      d = {800: True, 900: False}
+      return d, dirVir, bool
     else:
       raise IndexError(f'Index {dirVir} out of range')
 
@@ -159,18 +162,26 @@ class MaquinaVirtual:
       else:
         mem = 'current'
 
-      leftOp = self.checkPointer(self.quadruples[self.IP].leftOp)
-      memoria, dirOffset, tipoL = self.getMemory(leftOp, mem)
-      valorLeft = memoria[dirOffset]
-
-      rightOp = self.checkPointer(self.quadruples[self.IP].rightOp)
-      memoria, dirOffset, tipoR = self.getMemory(rightOp, mem)
-      valorRight = memoria[dirOffset]
-
-      arithmeticRes = arithmeticOps[codigoOp](tipoL(valorLeft), tipoR(valorRight))
       res = self.quadruples[self.IP].res
-      memoria, dirOffset, _ = self.getMemory(res, mem)
-      memoria[dirOffset] = arithmeticRes
+      if type(res) == tuple:
+        dirV = res[0]
+        size = res[1]
+      else:
+        dirV = res
+        size = 1
+      memoriaRes, dirOffsetRes, _ = self.getMemory(dirV, mem)
+      
+      leftOp = self.checkPointer(self.quadruples[self.IP].leftOp)
+      memoriaL, dirOffsetL, tipoL = self.getMemory(leftOp, mem)
+      rightOp = self.checkPointer(self.quadruples[self.IP].rightOp)
+      memoriaR, dirOffsetR, tipoR = self.getMemory(rightOp, mem)
+      
+      for i in range(0, size):
+        valorLeft = memoriaL[dirOffsetL+i]
+        valorRight = memoriaR[dirOffsetR+i]
+        arithmeticRes = arithmeticOps[codigoOp](tipoL(valorLeft), tipoR(valorRight))
+        memoriaRes[dirOffsetRes+i] = arithmeticRes
+
     # case 'lee'
     elif codigoOp == 14:
       res = self.checkPointer(self.quadruples[self.IP].res)
