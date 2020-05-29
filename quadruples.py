@@ -77,7 +77,7 @@ def generateQuad(currFunc, pointer=False, size=1):
             bTempCount += 1
         quadCount += 1
     else:
-        raise TypeError(f'Cannot apply {oper} to {leftType} and {rightType}')
+        raise TypeError(f'Can`t apply {oper} to {leftType} and {rightType}')
 
 def generateAssigmentQuad(size=1):
     res = pilaVariables.pop()
@@ -95,7 +95,7 @@ def generateAssigmentQuad(size=1):
         pilaVariables.push(var)
         pilaTipos.push(varType)
     else:
-        raise TypeError(f'Cannot apply {oper} to {varType} and {resType}')
+        raise TypeError(f'Can`t apply {oper} to {varType} and {resType}')
 
 def generateDecisionQuad():
     global quadCount

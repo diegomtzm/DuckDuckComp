@@ -23,7 +23,7 @@ def getTipo(var):
     elif var in dirFunc['global']['vars']:
         return dirFunc['global']['vars'][var][1]
     else:
-        raise NameError(f'Variable {var} no esta declarada')
+        raise NameError(f'Variable {var} is not declared')
 
 # Return the operand virtual memory address
 def getDirV(operand, operandType):
@@ -33,7 +33,7 @@ def getDirV(operand, operandType):
         elif operand in dirFunc['global']['vars']:
             return dirFunc['global']['vars'][operand][0]
         else:
-            raise NameError(f'Variable {operand} no esta declarada')
+            raise NameError(f'Variable {operand} is not declared')
     elif operandType == 'cte':
         return tablaCtes[operand]
 
@@ -87,7 +87,7 @@ class Tables(Transformer):
     def start(self, args):
         global dirFunc
         if 'global' in dirFunc:
-            raise NameError('doble declaración de programa')
+            raise NameError('Double program declaration')
         else:
             dirFunc['global'] = {'type': 'program', 'vars': {}}
             global dvcte
@@ -106,7 +106,7 @@ class Tables(Transformer):
         varList = dirFunc[currFunc]['vars']
         idName = currVar
         if idName in varList:
-            raise NameError(f'Variable {idName} ya existe en {currFunc}')
+            raise NameError(f'Variable {idName} already exists in {currFunc}')
         else:
             if currFunc == "global":
                 scope = 'global'
@@ -158,7 +158,7 @@ class Tables(Transformer):
         global currFunc
         currFunc = args[0].value
         if currFunc in dirFunc:
-            raise NameError(f'Funcion {currFunc} ya existe')
+            raise NameError(f'Function {currFunc} already exists')
         else:
             dirFunc[currFunc] = {'type': currType, 'vars': {}, 'params': ''}
             if currType != 'void':
@@ -171,7 +171,7 @@ class Tables(Transformer):
         global currFuncCall
         currFuncCall = args[0].value
         if currFuncCall not in dirFunc:
-            raise NameError(f'La funcion: {currFuncCall} no existe\n')
+            raise NameError(f'Function {currFuncCall} is not declared')
 
         return Tree('llamada_name', args)
 
@@ -238,7 +238,7 @@ class Tables(Transformer):
         varList = dirFunc[currFunc]['vars']
         idName = args[0].value
         if idName in varList:
-            raise NameError(f'Variable {args[0].value} ya existe en {currFunc}')
+            raise NameError(f'Variable {args[0].value} already exists in {currFunc}')
         else:
             dirV = getNewDirV(currType, 'local')
             varList[idName] = {0: dirV, 1: currType, 'size': 1, 'dim1': None}
@@ -420,7 +420,7 @@ class Tables(Transformer):
                         generateQuad(currFunc, size=size)
                         pilaDimensions.push(leftDims)
                     else:
-                        raise RuntimeError(f'Can`t apply {top} between vars of size {rightDims} and {leftDims}')
+                        raise RuntimeError(f'Can`t apply {top} between vars of size {leftDims} and {rightDims}')
                 elif pilaDimensions.size() > 0:
                     dims = pilaDimensions.pop()
                     raise RuntimeError(f'Uncompatible sizes {dims} vs 1')
@@ -439,7 +439,7 @@ class Tables(Transformer):
                         generateQuad(currFunc, rightDims, leftDims)
                         pilaDimensions.push(leftDims[0], rightDims[1])
                     else:
-                        raise RuntimeError(f'Can`t apply {top} between vars of size {rightDims} and {leftDims}')
+                        raise RuntimeError(f'Can`t apply {top} between vars of size {leftDims} and {rightDims}')
                 generateQuad(currFunc)
         return Tree('factor', args)
 
@@ -463,7 +463,7 @@ class Tables(Transformer):
                         pilaVariables.pop()
                         pilaTipos.pop()
                     else:
-                        raise RuntimeError(f'Can`t assign array of size {rightDims} to array of size {leftDims}')
+                        raise RuntimeError(f'Can`t assign array of size {rightDims} to an array of size {leftDims}')
                 elif pilaDimensions.size() > 0:
                     dims = pilaDimensions.pop()
                     raise RuntimeError(f'Uncompatible sizes {dims} vs 1')
@@ -545,7 +545,7 @@ class Tables(Transformer):
         varList = dirFunc[currFunc]['vars']
         idName = args[0].value
         if idName not in varList:
-            raise NameError(f'Variable {args[0].value} no existe en {currFunc}')
+            raise NameError(f'Variable {args[0].value} is not declared')
         else:
             var = dirFunc[currFunc]['vars'][idName][0]
             varType = dirFunc[currFunc]['vars'][idName][1]

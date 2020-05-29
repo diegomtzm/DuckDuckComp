@@ -118,7 +118,7 @@ class MaquinaVirtual:
       d = {800: True, 900: False}
       return d, dirVir, bool
     else:
-      raise IndexError(f'Index {dirVir} out of range')
+      raise IndexError(f'Address {dirVir} out of range')
 
   def switch(self, codigoOp):
     # case '='

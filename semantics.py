@@ -62,7 +62,7 @@ class Semantics():
         },
         # char, char
         'char' : {
-          '+' : 'char', '-' : 'ERROR', '*' : 'ERROR', '/' : 'ERROR', '=' : 'char', '&' : 'ERROR', '||': 'ERROR',
+          '+' : 'ERROR', '-' : 'ERROR', '*' : 'ERROR', '/' : 'ERROR', '=' : 'char', '&' : 'ERROR', '||': 'ERROR',
           '<' : 'bool', '<=' : 'bool', '>' : 'bool', '>=' : 'bool', '!=' : 'bool', '==' : 'bool'
         },
         # char, bool
