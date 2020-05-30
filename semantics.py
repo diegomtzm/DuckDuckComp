@@ -4,6 +4,10 @@ class Semantics():
     self.Semantics = {
       # int
       'int' : { 
+        # int, mat
+        'mat' : {
+          '?' : 'float', '$' : 'float', '¡' : 'int'
+        },
         # int, int
         'int' : {
         '+' : 'int', '-' : 'int', '*' : 'int', '/' : 'float', '=' : 'int', '&' : 'ERROR', '||': 'ERROR',
@@ -26,7 +30,11 @@ class Semantics():
         }
       },
       # float
-      'float' : { 
+      'float' : {
+        # float, mat
+        'mat' : {
+          '?' : 'float', '$' : 'float', '¡' : 'float'
+        },
         # float, int
         'int' : {
         '+' : 'float', '-' : 'float', '*' : 'float', '/' : 'float', '=' : 'float', '&' : 'ERROR', '||': 'ERROR',
@@ -50,6 +58,10 @@ class Semantics():
       },
       # char
       'char' : { 
+        # char, mat
+        'mat' : {
+          '?' : 'ERROR', '$' : 'ERROR', '¡' : 'ERROR'
+        },
         # char, int
         'int' : {
         '+' : 'ERROR', '-' : 'ERROR', '*' : 'ERROR', '/' : 'ERROR', '=' : 'ERROR', '&' : 'ERROR', '||': 'ERROR',
@@ -72,6 +84,10 @@ class Semantics():
         }
       },
       'bool' : { 
+        # bool, mat
+        'mat' : {
+          '?' : 'ERROR', '$' : 'ERROR', '¡' : 'ERROR'
+        },
         # bool, int
         'int' : {
         '+' : 'ERROR', '-' : 'ERROR', '*' : 'ERROR', '/' : 'ERROR', '=' : 'ERROR', '&' : 'ERROR', '||': 'ERROR',
