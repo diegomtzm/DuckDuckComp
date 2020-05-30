@@ -436,11 +436,34 @@ class Tables(Transformer):
                     rightDims = pilaDimensions.pop()
                     leftDims = pilaDimensions.pop()
                     if leftDims[1] == rightDims[0]:
-                        generateQuad(currFunc, rightDims, leftDims)
-                        pilaDimensions.push(leftDims[0], rightDims[1])
+                        generateMatMulQuad(currFunc, leftDims, rightDims)
+                        pilaDimensions.push((leftDims[0], rightDims[1]))
                     else:
                         raise RuntimeError(f'Can`t apply {top} between vars of size {leftDims} and {rightDims}')
-                generateQuad(currFunc)
+                elif pilaDimensions.size() > 0:
+                    dims = pilaDimensions.pop()
+                    raise RuntimeError(f'Uncompatible sizes {dims} vs 1')
+                else:
+                    generateQuad(currFunc)
+            elif top == "¡" or top == "?":
+                if pilaDimensions.size() > 0:
+                    rightDims = pilaDimensions.pop()
+                    generateOpMatQuad(rightDims, currFunc)
+                    if top == "¡":
+                        pilaDimensions.push((rightDims[1], rightDims[0]))
+                    elif top == "?":
+                        pilaDimensions.push(rightDims)
+                else:
+                    raise RuntimeError(f'Can`t apply {top} if it`s not a matrix')
+            elif top == "$":
+                if pilaDimensions.size() > 0:
+                    rightDims = pilaDimensions.pop()
+                    if rightDims[0] == rightDims[1]:
+                        generateOpMatQuad(rightDims, currFunc)
+                    else:
+                        raise RuntimeError(f'Can`t apply {top} to a non-square matrix of size {rightDims[0]}x{rightDims[1]}')
+                else:
+                    raise RuntimeError(f'Can`t apply {top} if it`s not a matrix')
         return Tree('factor', args)
 
     def full_exp_comp(self, args):
@@ -585,4 +608,9 @@ class Tables(Transformer):
         op = args[0].value
         pilaOperadores.push(op)
         return Tree('op3', args)
+
+    def op_mat(self, args):
+        op = args[0].value
+        pilaOperadores.push(op)
+        return Tree('op_mat', args)
         

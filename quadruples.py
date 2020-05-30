@@ -68,16 +68,92 @@ def generateQuad(currFunc, pointer=False, size=1):
         cuadruplos.append(quad)
         pilaTipos.push(result_type)
         if result_type == 'int':
-            iTempCount += 1
+            iTempCount += size
         elif result_type == 'float':
-            fTempCount += 1
+            fTempCount += size
         elif result_type == 'char':
-            cTempCount += 1
+            cTempCount += size
         elif result_type == 'bool':
-            bTempCount += 1
+            bTempCount += size
         quadCount += 1
     else:
         raise TypeError(f'Can`t apply {oper} to {leftType} and {rightType}')
+
+def generateMatMulQuad(currFunc, leftDims, rightDims):
+    rightOp = pilaVariables.pop()
+    rightType = pilaTipos.pop()
+    leftOp = pilaVariables.pop()
+    leftType = pilaTipos.pop()
+    oper = pilaOperadores.pop()
+    result_type = Semantics().get_type(leftType, rightType, oper)
+    if(result_type != 'ERROR'):
+        global quadCount
+        global iTempCount
+        global fTempCount
+        global cTempCount
+        global bTempCount
+        global pTempCount
+        global cuadruplos
+
+        if currFunc == "global":
+            scope = 'globalTemp'
+        else:
+            scope = 'localTemp'
+
+        dirVTemp = getNewDirV(result_type, scope)
+        codigoOper = tablaOperadores[oper]
+
+        leftArg = (leftOp, leftDims)
+        rightArg = (rightOp, rightDims)
+
+        quad = Quadruple(codigoOper, leftArg, rightArg, dirVTemp)
+        cuadruplos.append(quad)
+        quadCount += 1
+        pilaVariables.push(dirVTemp)
+        pilaTipos.push(result_type)
+
+        size = leftDims[0] * rightDims[1]
+        if result_type == 'int':
+            iTempCount += size
+        elif result_type == 'float':
+            fTempCount += size
+    else:
+        raise TypeError(f'Can`t apply {oper} to {leftType} and {rightType}')
+
+def generateOpMatQuad(dims, currFunc):
+    global quadCount
+    global cuadruplos
+    global iTempCount
+    global fTempCount
+    var = pilaVariables.pop()
+    varType = pilaTipos.pop()
+    oper = pilaOperadores.pop()
+    result_type = Semantics().get_type(varType, 'mat', oper)
+    print(f'Result Type: {result_type}')
+    if result_type != 'ERROR':
+        codigoOper = tablaOperadores[oper]
+        if currFunc == "global":
+            scope = 'globalTemp'
+        else:
+            scope = 'localTemp'
+        dirVTemp = getNewDirV(result_type, scope)
+        print(f'dirVTemp: {dirVTemp}')
+        quad = Quadruple(codigoOper, var, dims, dirVTemp)
+        cuadruplos.append(quad)
+        quadCount += 1
+        pilaVariables.push(dirVTemp)
+        pilaTipos.push(result_type)
+        if oper == '$':
+            size = 1
+        else:
+            size = dims[0] * dims[1]
+        if result_type == 'int':
+            iTempCount += size
+        elif result_type == 'float':
+            print(f'size: {size}')
+            fTempCount += size
+    else:
+        raise TypeError(f'Can`t apply {oper} to {varType}')
 
 def generateAssigmentQuad(size=1):
     res = pilaVariables.pop()

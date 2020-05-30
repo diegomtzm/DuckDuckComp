@@ -1,3 +1,4 @@
+import numpy as np
 from memoryMap import *
 from structs import *
 
@@ -169,19 +170,51 @@ class MaquinaVirtual:
       else:
         dirV = res
         size = 1
+
+      leftOp = self.quadruples[self.IP].leftOp
+      rightOp = self.quadruples[self.IP].rightOp
+
+      if type(leftOp) == tuple and type(rightOp) == tuple:
+        dirVLeft = leftOp[0]
+        leftDims = leftOp[1]
+        dirVRight = rightOp[0]
+        rightDims = rightOp[1]
+        size = leftDims[0] * rightDims[1]
+      else:
+        dirVLeft = self.checkPointer(leftOp)
+        dirVRight = self.checkPointer(rightOp)
+        size = 1
+        
       memoriaRes, dirOffsetRes, _ = self.getMemory(dirV, mem)
-      
-      leftOp = self.checkPointer(self.quadruples[self.IP].leftOp)
-      memoriaL, dirOffsetL, tipoL = self.getMemory(leftOp, mem)
-      rightOp = self.checkPointer(self.quadruples[self.IP].rightOp)
-      memoriaR, dirOffsetR, tipoR = self.getMemory(rightOp, mem)
+      memoriaL, dirOffsetL, tipoL = self.getMemory(dirVLeft, mem) 
+      memoriaR, dirOffsetR, tipoR = self.getMemory(dirVRight, mem)
 
       res = [None] * size
-      for i in range(0, size):
-        valorLeft = memoriaL[dirOffsetL+i]
-        valorRight = memoriaR[dirOffsetR+i]
-        arithmeticRes = arithmeticOps[codigoOp](tipoL(valorLeft), tipoR(valorRight))
-        res[i] = arithmeticRes
+      if codigoOp == 3 and type(leftOp) == tuple and type(rightOp) == tuple:
+        leftSize = leftDims[0] * leftDims[1]
+        leftTemp = [None] * leftSize
+        rightSize = rightDims[0] * rightDims[1]
+        rightTemp = [None] * rightSize
+        for i in range(0, leftSize):
+          leftTemp[i] = memoriaL[dirOffsetL+i]
+        for i in range(0, rightSize):
+          rightTemp[i] = memoriaR[dirOffsetR+i]
+        
+        leftTempMatrix = np.reshape(leftTemp, leftDims)
+        leftMatrix = np.matrix(leftTempMatrix)
+        rightTempMatrix = np.reshape(rightTemp, rightDims)
+        rightMatrix = np.matrix(rightTempMatrix)
+
+        matrixRes = np.dot(leftMatrix, rightMatrix)
+        res = matrixRes.A1
+
+      else:
+        for i in range(0, size):
+          valorLeft = memoriaL[dirOffsetL+i]
+          valorRight = memoriaR[dirOffsetR+i]
+          arithmeticRes = arithmeticOps[codigoOp](tipoL(valorLeft), tipoR(valorRight))
+          res[i] = arithmeticRes
+
       for i in range(0, size):
         memoriaRes[dirOffsetRes+i] = res[i]
 
@@ -296,6 +329,43 @@ class MaquinaVirtual:
 
       if valor < 0 or valor >= lim:
         raise IndexError(f'Index {valor} out of range')
+    # case '?', '¡', '$'
+    elif codigoOp == 25 or codigoOp == 26 or codigoOp == 27:
+      var = self.quadruples[self.IP].leftOp
+      memoria, dirOffset, _ = self.getMemory(var)
+
+      dims = self.quadruples[self.IP].rightOp
+
+      res = self.quadruples[self.IP].res
+      memoriaRes, dirOffsetRes, _ = self.getMemory(res)
+
+      size = dims[0] * dims[1]
+      temp = [None] * size
+      for i in range(0, size):
+        temp[i] = memoria[dirOffset+i]
+
+      
+      tempMatrix = np.reshape(temp, dims)
+      matrix = np.matrix(tempMatrix, dtype='float')
+      # case '$'
+      if codigoOp == 27:
+        det = np.linalg.det(matrix)
+        memoriaRes[dirOffsetRes] = det
+      else:
+        # case '?'
+        if codigoOp == 25:
+          try:
+            matrixRes = np.linalg.inv(matrix)
+          except:
+            raise ValueError(f'There`s no inverse for this matrix')
+        # case '¡'
+        elif codigoOp == 26:
+          matrixRes = matrix.transpose()
+        # Push results to memory
+        tempRes = matrixRes.A1
+        for i in range(0, size):
+          memoriaRes[dirOffsetRes+i] = tempRes[i]
+        
 
   def execute(self):
     self.pilaFunciones.push((self.memLocal, self.memLocalTemp))

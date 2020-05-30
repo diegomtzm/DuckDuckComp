@@ -1,7 +1,9 @@
 Programa expresiones;
 var
-  int A[5], B[5][4], C[5][4];
-  int a, b, c, f, g, h;
+  int B[3][2], C[2][3], D[3][2];
+  float A[3][3];
+  int a, b, c, f, g, h, i, j;
+  float G[3][2];
   float d, e;
   bool k, l, m;
 
@@ -32,14 +34,52 @@ var
 }
 
 principal() {
-  b = 12 + 4;
-  a = fact(b+5);
-  inicia(8, 2.2);
-  escribe(a);
-  escribe("----------------------");
-  C[3][2] = 15;
-  B[3][2] = -3;
-  escribe(B[3][2]);
-  B = C;
-  escribe(B[3][2]);
+  %%desde i = 0 hasta 2 hacer {
+  %%  desde j = 0 hasta 2 hacer {
+  %%    D[i][j] = i*j;
+  %%  }
+  %%}
+  %%D[0][0] = 3;
+  %%D[0][1] = 8;
+  %%D[1][0] = 4;
+  %%D[1][1] = 6;
+  %%d = D$;
+  %%escribe(d);
+  %%G = D?;
+  %%G = D¡;
+  %%desde i = 0 hasta 2 hacer {
+  %%  desde j = 0 hasta 1 hacer {
+   %%   escribe(G[i][j]);
+    %%}
+  %%}
+
+  escribe("---------------------1");
+  desde i = 0 hasta 2 hacer {
+    desde j = 0 hasta 1 hacer {
+      B[i][j] = i * j + 1;
+    }
+  }
+  desde i = 0 hasta 1 hacer {
+    desde j = 0 hasta 2 hacer {
+      C[i][j] = i + j + 1;
+    }
+  }
+  desde i = 0 hasta 2 hacer {
+    desde j = 0 hasta 1 hacer {
+      escribe(B[i][j]);
+    }
+  }
+  escribe("---------------------2");
+  desde i = 0 hasta 1 hacer {
+    desde j = 0 hasta 2 hacer {
+      escribe(C[i][j]);
+    }
+  }
+  escribe("---------------------3");
+  A = B * C;
+  desde i = 0 hasta 2 hacer {
+    desde j = 0 hasta 2 hacer {
+      escribe(A[i][j]);
+    }
+  }
 }
