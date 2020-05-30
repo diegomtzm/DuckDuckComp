@@ -85,20 +85,19 @@ ld_grammar = r"""
   termino: factor op2?
   op2: producto termino
 	producto: PRODUCTO
-  factor: variable op_mat?
+  factor: variable
       | number
       | llamada
       | boolean
       | open_par exp_logica close_par
+      | var_id op_mat
 	open_par: OPENPAR
 	close_par: CLOSEPAR
   boolean: TRUE
       | FALSE
 	number: NUMBER
       | SIGNED_NUMBER
-  op_mat: "$"
-      | "¡"
-      | "?"
+  op_mat: OPMAT
   exp_logica: exp_comp op3?
   op3: oplogic exp_logica
   oplogic: OPLOGIC
@@ -133,6 +132,7 @@ ld_grammar = r"""
 	PRODUCTO: "*" | "/"
   OPCOMP: ">=" | "<=" | "!=" | "==" | ">" | "<"
   OPLOGIC: "&" | "||"
+  OPMAT: "$" | "¡" | "?"
 	IGUAL: "="
 	OPENPAR: "("
 	CLOSEPAR: ")"
