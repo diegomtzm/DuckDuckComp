@@ -25,6 +25,14 @@ dvblt = 64000
 # Espacios de memoria virtual para constantes
 dvcte = 66000
 
+# Espacios de memoria virtual para pointers
+dvpg = 70000
+dvpl = 72000
+
+# Espacios de memoria virtual para variables booleanas
+dvtrue = 800
+dvfalse = 900 
+
 dirVirtual = {}
 dirVirtual['global'] = {
   'int': dvig,
@@ -36,7 +44,8 @@ dirVirtual['globalTemp'] = {
   'int': dvigt,
   'float': dvfgt,
   'char': dvcgt,
-  'bool': dvbgt
+  'bool': dvbgt,
+  'pointer': dvpg
 }
 dirVirtual['local'] = {
   'int': dvil,
@@ -48,7 +57,8 @@ dirVirtual['localTemp'] = {
   'int': dvilt,
   'float': dvflt,
   'char': dvclt,
-  'bool': dvblt
+  'bool': dvblt,
+  'pointer': dvpl
 }
 
 tablaCtes = {}
@@ -57,10 +67,14 @@ tablaCtesDir = {}
 tablaOperadores = {
   "+": 1, "-": 2, "*": 3, "/": 4, "=": 5, "<=": 6, ">=": 7, ">": 8, "<": 9, 
   "!=": 10, "==": 11, "&": 12, "||": 13, "lee": 14, "escribe": 15, "regresa": 16,
-  "goTo": 17, "goToF": 18, "endFunc": 19, "end": 20, "era": 21, "param": 22, "goSub": 23
+  "goTo": 17, "goToF": 18, "endFunc": 19, "end": 20, "era": 21, "param": 22, "goSub": 23, 
+  "ver": 24, "?": 25, "¡": 26, "$": 27
 }
 
 def getNewDirV(varType, scope):
   dirV = dirVirtual[scope][varType]
   dirVirtual[scope][varType] += 1
   return dirV
+
+def dirOffset(varType, scope, n):
+  dirVirtual[scope][varType] += n

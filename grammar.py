@@ -10,7 +10,8 @@ ld_grammar = r"""
   dec_var2: tipo lista_ids ";"
   lista_ids: id "," lista_ids?
       | id
-	id: ID dim? dim?
+	id: id_name dim? dim?
+  id_name: ID
   dim: "[" NUMBER "]"
   tipo: INT
       | FLOAT
@@ -39,7 +40,11 @@ ld_grammar = r"""
   asignacion: variable igual expresion fin_asignacion
 	fin_asignacion: ";"
 	igual: IGUAL
-  variable: ID dimn? dimn?
+  variable: var_dim
+          | var_id
+  var_dim: var_dim_id dimn dimn?
+  var_dim_id: ID
+  var_id: ID
   dimn: "[" expresion "]"
   llamada: llamada_name inicio_llamada params2? fin_llamada
   llamada_name: ID
@@ -80,20 +85,22 @@ ld_grammar = r"""
   termino: factor op2?
   op2: producto termino
 	producto: PRODUCTO
-  factor: variable op_mat?
+  factor: variable
       | number
       | llamada
-      | open_par exp_logica_or close_par
+      | boolean
+      | open_par exp_logica close_par
+      | var_id op_mat
 	open_par: OPENPAR
 	close_par: CLOSEPAR
+  boolean: TRUE
+      | FALSE
 	number: NUMBER
-  op_mat: "$"
-      | "¡"
-      | "?"
-  exp_logica_or: exp_logica_and op3?
-  op3: "||" exp_logica_or
-  exp_logica_and: exp_comp op4?
-  op4: "&" exp_logica_and
+      | SIGNED_NUMBER
+  op_mat: OPMAT
+  exp_logica: exp_comp op3?
+  op3: oplogic exp_logica
+  oplogic: OPLOGIC
   exp_comp: full_exp_comp
       | expresion
   full_exp_comp: expresion op_comp expresion
@@ -119,9 +126,13 @@ ld_grammar = r"""
   DESDE: "desde"
   HASTA: "hasta"
   HACER: "hacer"
+  TRUE: "True"
+  FALSE: "False"
 	ADICION: "+" | "-"
 	PRODUCTO: "*" | "/"
   OPCOMP: ">=" | "<=" | "!=" | "==" | ">" | "<"
+  OPLOGIC: "&" | "||"
+  OPMAT: "$" | "¡" | "?"
 	IGUAL: "="
 	OPENPAR: "("
 	CLOSEPAR: ")"
@@ -131,6 +142,7 @@ ld_grammar = r"""
   %import common.WORD
   %import common.ESCAPED_STRING -> STRING
   %import common.NUMBER
+  %import common.SIGNED_NUMBER
   %import common.WS
   %ignore WS
   %ignore COMMENT

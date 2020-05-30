@@ -6,6 +6,7 @@ pilaOperadores = Stack()
 pilaSaltos = Stack()
 pilaVariables = Stack()
 pilaTipos = Stack()
+pilaDimensions = Stack()
 
 cuadruplos = []
 quadCount = 0
@@ -13,6 +14,7 @@ iTempCount = 0
 fTempCount = 0
 cTempCount = 0
 bTempCount = 0
+pTempCount = 0
 paramCount = 0
 currParams = []
 currFuncCall = ''
@@ -28,7 +30,7 @@ class Quadruple:
     quad = [self.op, self.leftOp, self.rightOp, self.res]
     return quad
 
-def generateQuad(currFunc):
+def generateQuad(currFunc, pointer=False, size=1):
     rightOp = pilaVariables.pop()
     rightType = pilaTipos.pop()
     leftOp = pilaVariables.pop()
@@ -41,6 +43,56 @@ def generateQuad(currFunc):
         global fTempCount
         global cTempCount
         global bTempCount
+        global pTempCount
+        global cuadruplos
+
+        if currFunc == "global":
+            scope = 'globalTemp'
+        else:
+            scope = 'localTemp'
+
+        if pointer:
+            dirVTemp = getNewDirV('pointer', scope)
+            pTempCount += 1
+        else:
+            dirVTemp = getNewDirV(result_type, scope)
+        codigoOper = tablaOperadores[oper]
+
+        if size > 1:
+            dirVTemp = (dirVTemp, size)
+            pilaVariables.push(dirVTemp[0])
+        else:
+            pilaVariables.push(dirVTemp)
+
+        quad = Quadruple(codigoOper, leftOp, rightOp, dirVTemp)
+        cuadruplos.append(quad)
+        pilaTipos.push(result_type)
+        if result_type == 'int':
+            iTempCount += size
+        elif result_type == 'float':
+            fTempCount += size
+        elif result_type == 'char':
+            cTempCount += size
+        elif result_type == 'bool':
+            bTempCount += size
+        quadCount += 1
+    else:
+        raise TypeError(f'Can`t apply {oper} to {leftType} and {rightType}')
+
+def generateMatMulQuad(currFunc, leftDims, rightDims):
+    rightOp = pilaVariables.pop()
+    rightType = pilaTipos.pop()
+    leftOp = pilaVariables.pop()
+    leftType = pilaTipos.pop()
+    oper = pilaOperadores.pop()
+    result_type = Semantics().get_type(leftType, rightType, oper)
+    if(result_type != 'ERROR'):
+        global quadCount
+        global iTempCount
+        global fTempCount
+        global cTempCount
+        global bTempCount
+        global pTempCount
         global cuadruplos
 
         if currFunc == "global":
@@ -51,23 +103,59 @@ def generateQuad(currFunc):
         dirVTemp = getNewDirV(result_type, scope)
         codigoOper = tablaOperadores[oper]
 
-        quad = Quadruple(codigoOper, leftOp, rightOp, dirVTemp)
+        leftArg = (leftOp, leftDims)
+        rightArg = (rightOp, rightDims)
+
+        quad = Quadruple(codigoOper, leftArg, rightArg, dirVTemp)
         cuadruplos.append(quad)
+        quadCount += 1
         pilaVariables.push(dirVTemp)
         pilaTipos.push(result_type)
-        if result_type == 'int':
-            iTempCount += 1
-        elif result_type == 'float':
-            fTempCount += 1
-        elif result_type == 'char':
-            cTempCount += 1
-        elif result_type == 'bool':
-            bTempCount += 1
-        quadCount += 1
-    else:
-        raise TypeError(f'Cannot apply {oper} to {leftType} and {rightType}')
 
-def generateAssigmentQuad():
+        size = leftDims[0] * rightDims[1]
+        if result_type == 'int':
+            iTempCount += size
+        elif result_type == 'float':
+            fTempCount += size
+    else:
+        raise TypeError(f'Can`t apply {oper} to {leftType} and {rightType}')
+
+def generateOpMatQuad(dims, currFunc):
+    global quadCount
+    global cuadruplos
+    global iTempCount
+    global fTempCount
+    var = pilaVariables.pop()
+    varType = pilaTipos.pop()
+    oper = pilaOperadores.pop()
+    result_type = Semantics().get_type(varType, 'mat', oper)
+    print(f'Result Type: {result_type}')
+    if result_type != 'ERROR':
+        codigoOper = tablaOperadores[oper]
+        if currFunc == "global":
+            scope = 'globalTemp'
+        else:
+            scope = 'localTemp'
+        dirVTemp = getNewDirV(result_type, scope)
+        print(f'dirVTemp: {dirVTemp}')
+        quad = Quadruple(codigoOper, var, dims, dirVTemp)
+        cuadruplos.append(quad)
+        quadCount += 1
+        pilaVariables.push(dirVTemp)
+        pilaTipos.push(result_type)
+        if oper == '$':
+            size = 1
+        else:
+            size = dims[0] * dims[1]
+        if result_type == 'int':
+            iTempCount += size
+        elif result_type == 'float':
+            print(f'size: {size}')
+            fTempCount += size
+    else:
+        raise TypeError(f'Can`t apply {oper} to {varType}')
+
+def generateAssigmentQuad(size=1):
     res = pilaVariables.pop()
     resType = pilaTipos.pop()
     var = pilaVariables.pop()
@@ -77,13 +165,13 @@ def generateAssigmentQuad():
     if(result_type != 'ERROR'):
         global quadCount
         codigoOper = tablaOperadores[oper]
-        quad = Quadruple(codigoOper, res, None, var)
+        quad = Quadruple(codigoOper, res, size, var)
         cuadruplos.append(quad)
         quadCount += 1
         pilaVariables.push(var)
         pilaTipos.push(varType)
     else:
-        raise TypeError(f'Cannot apply {oper} to {varType} and {resType}')
+        raise TypeError(f'Can`t apply {oper} to {varType} and {resType}')
 
 def generateDecisionQuad():
     global quadCount
@@ -114,7 +202,9 @@ def generateGoToQuad(returnJump):
 
 def rellenarQuad(numQuad):
     global quadCount
-    cuadruplos[numQuad][3] = quadCount
+    cuad = cuadruplos[numQuad]
+    cuad.res = quadCount
+    cuadruplos[numQuad] = cuad
 
 def pushJump(n=0):
     global quadCount
@@ -182,8 +272,8 @@ def generateDesdeFinQuad(currFunc, right, rightType):
         quadCount += 1
 
         codigoOper = tablaOperadores['=']
-        quad2 = Quadruple(codigoOper, dirVTemp, None, var)
-        cuadruplos.append(quad2.get())
+        quad2 = Quadruple(codigoOper, dirVTemp, 1, var)
+        cuadruplos.append(quad2)
         iTempCount += 1
         quadCount += 1
     else:
@@ -269,16 +359,20 @@ def generateGoSubQuad(initAddress):
     else:
         raise Exception(f'Expected {len(currParams)} params and received {paramCount}')
 
-def generateFuncAssignmentQuad(dirV, result_type):
+def generateFuncAssignmentQuad(dirV, result_type, currFunc):
     global quadCount
     global cuadruplos
     global iTempCount
     global fTempCount
     global cTempCount
     global bTempCount
-    dirVTemp = getNewDirV(result_type, 'globalTemp')
+    if currFunc == 'global':
+        scope = 'globalTemp'
+    else:
+        scope = 'localTemp'
+    dirVTemp = getNewDirV(result_type, scope)
     codigoOp = tablaOperadores['=']
-    quad = Quadruple(codigoOp, dirV, None, dirVTemp)
+    quad = Quadruple(codigoOp, dirV, 1, dirVTemp)
     cuadruplos.append(quad)
     quadCount += 1
     pilaVariables.push(dirVTemp)
@@ -291,6 +385,16 @@ def generateFuncAssignmentQuad(dirV, result_type):
         cTempCount += 1
     elif result_type == 'bool':
         bTempCount += 1
+
+def generateVerQuad(lim):
+    global quadCount
+    global cuadruplos
+    dirDim = pilaVariables.top()
+    codigoOp = tablaOperadores['ver']
+    quad = Quadruple(codigoOp, dirDim, None, lim)
+    cuadruplos.append(quad)
+    quadCount += 1
+
     
 def getCurrentQuadCount():
     global quadCount
@@ -301,7 +405,8 @@ def getTempCount():
     global fTempCount
     global cTempCount
     global bTempCount
-    tempCount = str(iTempCount) + str(fTempCount) + str(cTempCount) + str(bTempCount)
+    global pTempCount
+    tempCount = [iTempCount, fTempCount, cTempCount, bTempCount, pTempCount]
     return tempCount
 
 def resetTempCount():
@@ -309,4 +414,5 @@ def resetTempCount():
     global fTempCount
     global cTempCount
     global bTempCount
-    iTempCount, fTempCount, cTempCount, bTempCount = 0, 0, 0, 0
+    global pTempCount
+    iTempCount, fTempCount, cTempCount, bTempCount, pTempCount = 0, 0, 0, 0, 0
