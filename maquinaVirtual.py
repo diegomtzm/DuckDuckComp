@@ -163,16 +163,26 @@ class MaquinaVirtual:
       else:
         mem = 'current'
 
-      res = self.quadruples[self.IP].res
-      if type(res) == tuple:
-        dirV = res[0]
-        size = res[1]
-      else:
-        dirV = res
-        size = 1
-
       leftOp = self.quadruples[self.IP].leftOp
       rightOp = self.quadruples[self.IP].rightOp
+      res = self.quadruples[self.IP].res
+      if type(leftOp) == tuple and type(rightOp) == tuple:
+        dirVLeft = leftOp[0]
+        leftDims = leftOp[1]
+        dirVRight = rightOp[0]
+        rightDims = rightOp[1]
+        dirV = res
+        size = leftDims[0] * rightDims[1]
+      elif type(res) == tuple:
+        dirV = res[0]
+        size = res[1]
+        dirVLeft = self.checkPointer(leftOp)
+        dirVRight = self.checkPointer(rightOp)
+      else:
+        dirVLeft = self.checkPointer(leftOp)
+        dirVRight = self.checkPointer(rightOp)
+        dirV = res
+        size = 1
 
       if type(leftOp) == tuple and type(rightOp) == tuple:
         dirVLeft = leftOp[0]
