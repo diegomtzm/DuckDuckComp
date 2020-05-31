@@ -1,0 +1,43 @@
+%% Fibonacci con ciclo y Fibonacci recursivo
+var int i, res;
+
+funcion int fibonacci(int n):
+var int a, b, c;
+{
+  a = 0;
+  b = 1;
+  si ((n < 0)) entonces {
+    escribe("n no válida");
+  } sino {
+    si ((n <= 1 )) entonces {
+      regresa(n);
+    } sino {
+      desde i = 2 hasta n hacer {
+        c = a + b;
+        escribe(c);
+        a = b;
+        b = c;
+      }
+      regresa(b);
+    }
+  }
+}
+
+funcion int fibonacciRec(int n): 
+{
+  si ((n < 0)) entonces {
+    escribe("n no válida");
+  } sino {
+    si ((n <= 1)) entonces {
+      regresa(n);
+    } sino {
+      regresa(fibonacciRec(n-1) + fibonacciRec(n-2));
+    }
+  }
+}
+
+principal() {
+  res = fibonacciRec(20);
+  escribe("El resultado es");
+  escribe(res);
+}

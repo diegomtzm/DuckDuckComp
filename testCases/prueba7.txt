@@ -1,0 +1,74 @@
+%% Prueba de sumas, restas y multiplicaciones de matrices
+%% Programa válido
+
+Programa expresiones;
+var
+  int B[5][2], C[2][5], D[5][5];
+  float A[5][5];
+  int a, b, c, f, g, h, i, j;
+  float G[3][2];
+  float d, e;
+  bool k, l, m;
+
+funcion int fact (int j):
+var int x;
+{ 
+  escribe("FACT");
+  escribe(j);
+  si ((j > 0)) entonces {
+    x = 3;
+    regresa(fact(j-x));
+  } sino {
+    regresa(-2);
+  }
+}
+
+funcion void inicia(int y, float z):
+var 
+  int x;
+  float s;
+  bool m, d, r;
+{
+  escribe("INICIA");
+  escribe(y, z);
+  x = fact(9);
+  escribe("INICIA 2");
+  escribe(y+z+x);
+}
+
+principal() {
+  escribe("---------------------1");
+  desde i = 0 hasta 4 hacer {
+    desde j = 0 hasta 1 hacer {
+      B[i][j] = i * j + 1;
+    }
+  }
+  desde i = 0 hasta 1 hacer {
+    desde j = 0 hasta 4 hacer {
+      C[i][j] = i + j + 1;
+    }
+  }
+  desde i = 0 hasta 4 hacer {
+    desde j = 0 hasta 1 hacer {
+      escribe(B[i][j]);
+    }
+  }
+  escribe("---------------------2");
+  desde i = 0 hasta 1 hacer {
+    desde j = 0 hasta 4 hacer {
+      escribe(C[i][j]);
+    }
+  }
+  desde i = 0 hasta 4 hacer {
+    desde j = 0 hasta 4 hacer {
+      D[i][j] = 1;
+    }
+  }
+  escribe("---------------------3");
+  A = B * C + D;
+  desde i = 0 hasta 4 hacer {
+    desde j = 0 hasta 4 hacer {
+      escribe(A[i][j]);
+    }
+  }
+}
