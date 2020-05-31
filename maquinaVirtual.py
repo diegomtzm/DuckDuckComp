@@ -183,18 +183,6 @@ class MaquinaVirtual:
         dirVRight = self.checkPointer(rightOp)
         dirV = res
         size = 1
-
-      if type(leftOp) == tuple and type(rightOp) == tuple:
-        dirVLeft = leftOp[0]
-        leftDims = leftOp[1]
-        dirVRight = rightOp[0]
-        rightDims = rightOp[1]
-        size = leftDims[0] * rightDims[1]
-      else:
-        dirVLeft = self.checkPointer(leftOp)
-        dirVRight = self.checkPointer(rightOp)
-        size = 1
-        
       memoriaRes, dirOffsetRes, _ = self.getMemory(dirV, mem)
       memoriaL, dirOffsetL, tipoL = self.getMemory(dirVLeft, mem) 
       memoriaR, dirOffsetR, tipoR = self.getMemory(dirVRight, mem)
@@ -316,8 +304,8 @@ class MaquinaVirtual:
       memoria, dirOffset, tipoRet = self.getMemory(retDir)
       retVal = memoria[dirOffset]
 
-      res = self.dirFunc['global']['vars'][self.currFunc][0]
-      memoria, dirOffset, tipoFunc = self.getMemory(res)
+      leftOp = self.quadruples[self.IP].leftOp
+      memoria, dirOffset, tipoFunc = self.getMemory(leftOp)
       if tipoRet == tipoFunc:
         memoria[dirOffset] = retVal
         ip = self.IPatCall.pop()

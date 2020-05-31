@@ -302,12 +302,12 @@ def generateNewLineQuad():
     cuadruplos.append(quad)
     quadCount += 1
 
-def generateRetornoExp():
+def generateRetornoExp(currFuncVar):
     global quadCount
     var = pilaVariables.pop()
     varType = pilaTipos.pop()
     codigoOp = tablaOperadores['regresa']
-    quad = Quadruple(codigoOp, None, None, var)
+    quad = Quadruple(codigoOp, currFuncVar, None, var)
     cuadruplos.append(quad)
     quadCount += 1
 

@@ -66,9 +66,7 @@ class Tables(Transformer):
         generateEndQuad()
         tempCount = getTempCount()
         dirFunc[currFunc]['tempCount'] = tempCount
-        # No se borran aun para poder probar, 
-        # descomentar siguiente linea para borrar la tabla de variables
-        # del dirFunc[currFunc]['vars']
+        del dirFunc[currFunc]['vars']
         resetTempCount()
 
         print("\nDirectorio de funciones:\n")
@@ -233,9 +231,7 @@ class Tables(Transformer):
         generateEndFuncQuad()
         tempCount = getTempCount()
         dirFunc[currFunc]['tempCount'] = tempCount
-        # No se borran aun para poder probar, 
-        # descomentar siguiente linea para borrar la tabla de variables
-        # del dirFunc[currFunc]['vars']
+        del dirFunc[currFunc]['vars']
         resetTempCount()
 
         return Tree('func', args)
@@ -537,8 +533,9 @@ class Tables(Transformer):
         return Tree('escritura', args)
 
     def retorno_expresion(self, args):
-        generateRetornoExp()
-        # Falta hacer return al resultado
+        global currFunc
+        currFuncVar = dirFunc['global']['vars'][currFunc][0]
+        generateRetornoExp(currFuncVar)
         return Tree('retorno_expresion', args)
 
     def decision_exp(self, args):
