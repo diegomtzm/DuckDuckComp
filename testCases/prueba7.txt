@@ -4,7 +4,7 @@
 Programa expresiones;
 var
   int B[5][2], C[2][5], D[5][5];
-  float A[5][5];
+  int A[5][5];
   int a, b, c, f, g, h, i, j;
   float G[3][2];
   float d, e;
@@ -15,6 +15,11 @@ var int x;
 { 
   escribe("FACT");
   escribe(j);
+  desde i = 0 hasta 4 hacer {
+    desde h = 0 hasta 4 hacer {
+      D[i][h] = 1;
+    }
+  }
   si ((j > 0)) entonces {
     x = 3;
     regresa(fact(j-x));
@@ -59,16 +64,17 @@ principal() {
       escribe(C[i][j]);
     }
   }
-  desde i = 0 hasta 4 hacer {
-    desde j = 0 hasta 4 hacer {
-      D[i][j] = 1;
-    }
-  }
   escribe("---------------------3");
+  fact(2);
   A = B * C + D;
   desde i = 0 hasta 4 hacer {
     desde j = 0 hasta 4 hacer {
       escribe(A[i][j]);
     }
   }
+  escribe("---------------------4");
+  a = 5;
+  b = 3;
+  lee(b);
+  escribe(a*b);
 }

@@ -37,12 +37,11 @@ def getDirV(operand, operandType):
     elif operandType == 'cte':
         return tablaCtes[operand]
 
-# Return the variable size
-def getSize(var):
+def getFromVar(var, query):
     if var in dirFunc[currFunc]['vars']:
-        return dirFunc[currFunc]['vars'][var]['size']
+        return dirFunc[currFunc]['vars'][var][query]
     elif var in dirFunc['global']['vars']:
-        return dirFunc['global']['vars'][var]['size']
+        return dirFunc['global']['vars'][var][query]
     else:
         raise NameError(f'Variable {var} is not declared')
 
@@ -189,7 +188,10 @@ class Tables(Transformer):
         return ('inicio_llamada', args)
 
     def params_exp(self, args):
-        generateParamQuad()
+        if pilaDimensions.size() > 0:
+            raise RuntimeError('Can`t send arrays as parameters to function')
+        else:
+            generateParamQuad()
         return ('params_exp', args)
 
     def fin_llamada(self, args):
@@ -288,12 +290,12 @@ class Tables(Transformer):
         var = args[0].value
         tipo = getTipo(var)
         dirV = getDirV(var, 'variable')
-        size = getSize(var)
+        size = getFromVar(var, 'size')
         pilaVariables.push(dirV)
         pilaTipos.push(tipo)
         if size > 1:
-            dim1 = int(dirFunc[currFunc]['vars'][var]['dim1'])
-            dim2 = int(dirFunc[currFunc]['vars'][var]['dim2'])
+            dim1 = int(getFromVar(var,'dim1'))
+            dim2 = int(getFromVar(var, 'dim2'))
             pilaDimensions.push((dim1, dim2))
         return Tree('var_id', args)
 
@@ -316,20 +318,20 @@ class Tables(Transformer):
         global dvcte
         var = pilaVarDim.top()
         if currDim == 0:
-            lim = dirFunc[currFunc]['vars'][var]['dim1']
+            lim = getFromVar(var, 'dim1')
             dirLim = tablaCtes[lim]
             generateVerQuad(dirLim)
-            if dirFunc[currFunc]['vars'][var]['dim2'] != '1':
+            if getFromVar(var, 'dim2') != '1':
                 currDim = 1
-                dim2 = dirFunc[currFunc]['vars'][var]['dim2']
+                dim2 = getFromVar(var, 'dim2')
                 dirDim2 = tablaCtes[dim2]
                 pilaVariables.push(dirDim2)
                 pilaTipos.push('int')
                 pilaOperadores.push('*')
                 generateQuad(currFunc)
             else:
-                dirBase = str(dirFunc[currFunc]['vars'][var][0])
-                tipoBase = dirFunc[currFunc]['vars'][var][1]
+                dirBase = str(getDirV(var, 'variable'))
+                tipoBase = getTipo(var)
                 if dirBase not in tablaCtes:
                     tablaCtes[dirBase] = dvcte
                     tablaCtesDir[dvcte] = dirBase
@@ -341,13 +343,13 @@ class Tables(Transformer):
 
         else:
             currDim = 0
-            lim = dirFunc[currFunc]['vars'][var]['dim2']
+            lim = getFromVar(var, 'dim2')
             dirLim = tablaCtes[lim]
             generateVerQuad(dirLim)
             pilaOperadores.push('+')
             generateQuad(currFunc)
-            dirBase = str(dirFunc[currFunc]['vars'][var][0])
-            tipoBase = dirFunc[currFunc]['vars'][var][1]
+            dirBase = str(getDirV(var, 'variable'))
+            tipoBase = getTipo(var)
             if dirBase not in tablaCtes:
                 tablaCtes[dirBase] = dvcte
                 tablaCtesDir[dvcte] = dirBase
@@ -475,7 +477,10 @@ class Tables(Transformer):
         if pilaOperadores.size() > 0:
             top = pilaOperadores.top()
             if top in [">", "<", "<=", ">=", "!=", "==", "&", "||"]:
-                generateQuad(currFunc)
+                if pilaDimensions.size() > 0:
+                    raise RuntimeError(f'Can`t apply {top} to arrays')
+                else:
+                    generateQuad(currFunc)
         return Tree('full_exp_comp', args)
 
     def fin_asignacion(self, args):
@@ -513,8 +518,12 @@ class Tables(Transformer):
     def lee_variable(self, args):
         global quadCount
         var = args[0].value
-        varDir = dirFunc[currFunc]['vars'][var][0]
-        generateLeeVariableQuad(varDir)
+        varDir = getDirV(var, 'variable')
+        size = getFromVar(var, 'size')
+        if size > 1:
+            raise RuntimeError('Can`t apply "lee" to whole arrays')
+        else:
+            generateLeeVariableQuad(varDir)
         return Tree('lee_variable', args)
 
     def string_salida(self, args):
@@ -525,7 +534,10 @@ class Tables(Transformer):
         return Tree('string_salida', args)
 
     def expresion_salida(self, args):
-        generateSalidaQuad()
+        if pilaDimensions.size() > 0:
+            raise RuntimeError('Can`t apply "escribe" to whole arrays')
+        else:
+            generateSalidaQuad()
         return Tree('expresion_salida', args)
 
     def escritura(self, args):
@@ -535,7 +547,10 @@ class Tables(Transformer):
     def retorno_expresion(self, args):
         global currFunc
         currFuncVar = dirFunc['global']['vars'][currFunc][0]
-        generateRetornoExp(currFuncVar)
+        if pilaDimensions.size() > 0:
+            raise RuntimeError('Can`t apply "regresa" to whole arrays')
+        else:
+            generateRetornoExp(currFuncVar)
         return Tree('retorno_expresion', args)
 
     def decision_exp(self, args):
@@ -620,4 +635,15 @@ class Tables(Transformer):
         op = args[0].value
         pilaOperadores.push(op)
         return Tree('op_mat', args)
+
+    def char(self, args):
+        global dvcte
+        char = args[0].value
+        if char not in tablaCtes:
+            tablaCtes[char] = dvcte
+            tablaCtesDir[dvcte] = char
+            dvcte += 1
+        pilaVariables.push(tablaCtes[char])
+        pilaTipos.push('char')
+        return Tree('char', args)
         

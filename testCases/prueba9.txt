@@ -1,0 +1,39 @@
+Programa expresiones;
+var int i, res, n;
+
+funcion int factorial(int n):
+var int fact;
+{
+  fact = 1;
+  si ((n < 0)) entonces {
+    escribe("n no válida");
+  } sino {
+    si ((n == 0)) entonces {
+      regresa(1);
+    } sino {
+      desde i = 1 hasta n hacer {
+        fact = fact * i;
+      }
+      regresa(fact);
+    }
+  }
+}
+
+funcion int factorialRec(int n):
+{
+  si ((n < 0)) entonces {
+    escribe("n no válida");
+  } sino {
+    si ((n == 1)) entonces {
+      regresa(1);
+    } sino {
+      regresa(n * factorialRec(n-1));
+    }
+  }
+}
+
+principal() {
+  n = 15;
+  res = factorial(n);
+  escribe("El factorial de", n, "es", res);
+}

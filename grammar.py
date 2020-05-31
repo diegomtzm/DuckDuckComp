@@ -91,6 +91,7 @@ ld_grammar = r"""
       | boolean
       | open_par exp_logica close_par
       | var_id op_mat
+      | char
 	open_par: OPENPAR
 	close_par: CLOSEPAR
   boolean: TRUE
@@ -98,6 +99,7 @@ ld_grammar = r"""
 	number: NUMBER
       | SIGNED_NUMBER
   op_mat: OPMAT
+  char: "'" LETTER "'"
   exp_logica: exp_comp op3?
   op3: oplogic exp_logica
   oplogic: OPLOGIC
@@ -143,6 +145,7 @@ ld_grammar = r"""
   %import common.ESCAPED_STRING -> STRING
   %import common.NUMBER
   %import common.SIGNED_NUMBER
+  %import common.LETTER
   %import common.WS
   %ignore WS
   %ignore COMMENT

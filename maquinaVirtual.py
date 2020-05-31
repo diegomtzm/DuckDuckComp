@@ -104,7 +104,9 @@ class MaquinaVirtual:
       return self.memLocalTempOld.bools, dirVir - 64000, bool
     # CTES
     elif dirVir >= 66000 and dirVir < 68000:
-      if '.' in self.ctes[dirVir]:
+      if ord(self.ctes[dirVir][0]) >= 65:
+        tipo = str
+      elif '.' in self.ctes[dirVir]:
         tipo = float
       else:
         tipo = int
@@ -150,7 +152,6 @@ class MaquinaVirtual:
       rightOp = self.checkPointer(self.quadruples[self.IP].rightOp)
       memoria, dirOffset, tipoR = self.getMemory(rightOp, mem)
       valorRight = memoria[dirOffset]
-
       compRes = compOps[codigoOp](tipoL(valorLeft), tipoR(valorRight))
       res = self.quadruples[self.IP].res
       memoria, dirOffset, _ = self.getMemory(res, mem)
