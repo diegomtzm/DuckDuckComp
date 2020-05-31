@@ -37,6 +37,15 @@ def getDirV(operand, operandType):
     elif operandType == 'cte':
         return tablaCtes[operand]
 
+# Return the variable size
+def getSize(var):
+    if var in dirFunc[currFunc]['vars']:
+        return dirFunc[currFunc]['vars'][var]['size']
+    elif var in dirFunc['global']['vars']:
+        return dirFunc['global']['vars'][var]['size']
+    else:
+        raise NameError(f'Variable {var} is not declared')
+
 def getVarsCount(vars):
     iCount, fCount, cCount, bCount = 0, 0, 0, 0
     for _, val in vars.items():
@@ -283,7 +292,7 @@ class Tables(Transformer):
         var = args[0].value
         tipo = getTipo(var)
         dirV = getDirV(var, 'variable')
-        size = dirFunc[currFunc]['vars'][var]['size']
+        size = getSize(var)
         pilaVariables.push(dirV)
         pilaTipos.push(tipo)
         if size > 1:
@@ -567,13 +576,10 @@ class Tables(Transformer):
         global currFunc
         varList = dirFunc[currFunc]['vars']
         idName = args[0].value
-        if idName not in varList:
-            raise NameError(f'Variable {args[0].value} is not declared')
-        else:
-            var = dirFunc[currFunc]['vars'][idName][0]
-            varType = dirFunc[currFunc]['vars'][idName][1]
-            pilaVariables.push(var)
-            pilaTipos.push(varType)
+        var = getDirV(idName, 'variable')
+        varType = getTipo(idName)
+        pilaVariables.push(var)
+        pilaTipos.push(varType)
 
         return Tree('variable_desde', args)
 
