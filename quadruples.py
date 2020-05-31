@@ -295,6 +295,13 @@ def generateSalidaQuad():
     cuadruplos.append(quad)
     quadCount += 1
 
+def generateNewLineQuad():
+    global quadCount
+    codigoOp = tablaOperadores['escribe']
+    quad = Quadruple(codigoOp, None, "nl", None)
+    cuadruplos.append(quad)
+    quadCount += 1
+
 def generateRetornoExp():
     global quadCount
     var = pilaVariables.pop()

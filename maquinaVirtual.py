@@ -227,12 +227,16 @@ class MaquinaVirtual:
     # case 'escribe'
     elif codigoOp == 15:
       res = self.quadruples[self.IP].res
-      if type(res) == str:
-        print(res)
+      rightOp = self.quadruples[self.IP].rightOp
+
+      if rightOp == "nl":
+        print()
+      elif type(res) == str:
+        print(res, end=" ")
       else:
         res = self.checkPointer(res)
         memoria, dirOffset, _ = self.getMemory(res)
-        print(memoria[dirOffset])
+        print(memoria[dirOffset], end=" ")
     # case 'gotoF'
     elif codigoOp == 18:
       dirV = self.quadruples[self.IP].leftOp

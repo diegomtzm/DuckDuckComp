@@ -523,7 +523,7 @@ class Tables(Transformer):
 
     def string_salida(self, args):
         var = args[0].value
-        pilaVariables.push(var)
+        pilaVariables.push(var.replace('"', ''))
         pilaTipos.push('char')
         generateSalidaQuad()
         return Tree('string_salida', args)
@@ -531,6 +531,10 @@ class Tables(Transformer):
     def expresion_salida(self, args):
         generateSalidaQuad()
         return Tree('expresion_salida', args)
+
+    def escritura(self, args):
+        generateNewLineQuad()
+        return Tree('escritura', args)
 
     def retorno_expresion(self, args):
         generateRetornoExp()
