@@ -129,7 +129,6 @@ def generateOpMatQuad(dims, currFunc):
     varType = pilaTipos.pop()
     oper = pilaOperadores.pop()
     result_type = Semantics().get_type(varType, 'mat', oper)
-    print(f'Result Type: {result_type}')
     if result_type != 'ERROR':
         codigoOper = tablaOperadores[oper]
         if currFunc == "global":
@@ -137,7 +136,6 @@ def generateOpMatQuad(dims, currFunc):
         else:
             scope = 'localTemp'
         dirVTemp = getNewDirV(result_type, scope)
-        print(f'dirVTemp: {dirVTemp}')
         quad = Quadruple(codigoOper, var, dims, dirVTemp)
         cuadruplos.append(quad)
         quadCount += 1
@@ -150,7 +148,6 @@ def generateOpMatQuad(dims, currFunc):
         if result_type == 'int':
             iTempCount += size
         elif result_type == 'float':
-            print(f'size: {size}')
             fTempCount += size
     else:
         raise TypeError(f'Can`t apply {oper} to {varType}')

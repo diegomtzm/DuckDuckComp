@@ -349,20 +349,22 @@ class MaquinaVirtual:
 
       
       tempMatrix = np.reshape(temp, dims)
-      matrix = np.matrix(tempMatrix, dtype='float')
       # case '$'
       if codigoOp == 27:
+        matrix = np.matrix(tempMatrix, dtype='float')
         det = np.linalg.det(matrix)
         memoriaRes[dirOffsetRes] = det
       else:
         # case '?'
         if codigoOp == 25:
           try:
+            matrix = np.matrix(tempMatrix, dtype='float')
             matrixRes = np.linalg.inv(matrix)
           except:
             raise ValueError(f'There`s no inverse for this matrix')
         # case '¡'
         elif codigoOp == 26:
+          matrix = np.matrix(tempMatrix)
           matrixRes = matrix.transpose()
         # Push results to memory
         tempRes = matrixRes.A1
