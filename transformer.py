@@ -16,7 +16,8 @@ currVar = ''
 pilaVarDim = Stack()
 currDim = 0
 
-# Return the variable type
+# @param: var, name of the variable
+# return: variable type in function directory
 def getTipo(var):
     if var in dirFunc[currFunc]['vars']:
         return dirFunc[currFunc]['vars'][var][1]
@@ -25,7 +26,9 @@ def getTipo(var):
     else:
         raise NameError(f'Variable {var} is not declared')
 
-# Return the operand virtual memory address
+# @param: operand, name of the variable
+# @param: operandType, operand type in function
+# return: operand virtual memory address
 def getDirV(operand, operandType):
     if operandType == 'variable':
         if operand in dirFunc[currFunc]['vars']:
@@ -37,6 +40,9 @@ def getDirV(operand, operandType):
     elif operandType == 'cte':
         return tablaCtes[operand]
 
+# @param: var, name of the variable
+# @param: query, attribute in function directory
+# return: attribute in function directory of the specified variable
 def getFromVar(var, query):
     if var in dirFunc[currFunc]['vars']:
         return dirFunc[currFunc]['vars'][var][query]
@@ -45,6 +51,8 @@ def getFromVar(var, query):
     else:
         raise NameError(f'Variable {var} is not declared')
 
+# @param: vars, scope
+# return: the count of all variables in the scope
 def getVarsCount(vars):
     iCount, fCount, cCount, bCount = 0, 0, 0, 0
     for _, val in vars.items():
@@ -60,7 +68,8 @@ def getVarsCount(vars):
     return varsCount
 
 class Tables(Transformer):
-    # Imprime el directorio de funciones para hacer pruebas
+    # Prints the function directory for testing purposes
+    # Main program and execute of virtual machine
     def programa(self, args):
         generateEndQuad()
         tempCount = getTempCount()
@@ -78,6 +87,7 @@ class Tables(Transformer):
         MV.execute()
         return Tree('program', args)
 
+    # Declares the start quadruple
     def start(self, args):
         global dirFunc
         if 'global' in dirFunc:
@@ -88,9 +98,9 @@ class Tables(Transformer):
             tablaCtes['1'] = dvcte
             tablaCtesDir[dvcte] = '1'
             dvcte += 1
-
         return Tree('start', args)
 
+    # Declares a new variable
     def id_name(self, args):
         global currVar
         global dirFunc
@@ -112,6 +122,7 @@ class Tables(Transformer):
             dirFunc[currFunc]['vars'] = varList
         return Tree('id_name', args)
 
+    # Used for dimensional variables (vector/matrix)
     def dim(self, args):
         global currVar
         global currFunc
@@ -122,15 +133,18 @@ class Tables(Transformer):
                 tablaCtes[dim] = dvcte
                 tablaCtesDir[dvcte] = dim
                 dvcte += 1
+            # One dimensional
             if dirFunc[currFunc]['vars'][currVar]['dim1'] == None:
                 dirFunc[currFunc]['vars'][currVar]['dim1'] = dim
                 dirFunc[currFunc]['vars'][currVar]['dim2'] = '1'
+            # Two dimensional
             else:
                 dirFunc[currFunc]['vars'][currVar]['dim2'] = dim
         else:
             raise Exception('Can`t define arrays of size 0')
         return Tree('dim', args)
 
+    # Determines size of variable
     def id(self, args):
         if dirFunc[currFunc]['vars'][currVar]['dim1'] != None:
             if currFunc == "global":
@@ -138,6 +152,7 @@ class Tables(Transformer):
             else:
                 scope = 'local'
 
+            # Check if temporal variable
             varDir = getDirV(currVar, 'variable')
             if varDir >= 50000:
                 scope += 'Temp'
@@ -148,6 +163,7 @@ class Tables(Transformer):
             dirFunc[currFunc]['vars'][currVar]['size'] = n
         return Tree('id', args)
 
+    # Declares a new function
     def func_name(self, args):
         global currFunc
         currFunc = args[0].value
@@ -158,23 +174,24 @@ class Tables(Transformer):
             if currType != 'void':
                 dirV = getNewDirV(currType, 'global')
                 dirFunc['global']['vars'][currFunc] = {0: dirV, 1: currType, 'size': 1, 'dim1': None}
-
         return Tree('func_name', args)
     
+    # Sets current function call to global
     def llamada_name(self, args):
         global currFuncCall
         currFuncCall = args[0].value
         if currFuncCall not in dirFunc:
             raise NameError(f'Function {currFuncCall} is not declared')
-
         return Tree('llamada_name', args)
 
+    # Generates ERA Quadruple
     def inicio_llamada(self, args):
         params = dirFunc[currFuncCall]['params']
         generateERAQuad(currFuncCall, params)
         pilaOperadores.push("[")
         return ('inicio_llamada', args)
 
+    # Generates PARAM Quadruple
     def params_exp(self, args):
         if pilaDimensions.size() > 0:
             raise RuntimeError('Can`t send arrays as parameters to function')
@@ -182,6 +199,7 @@ class Tables(Transformer):
             generateParamQuad()
         return ('params_exp', args)
 
+    # Generates GOSUB Quadruple and FUNCTION ASSIGNMENT Quadruple
     def fin_llamada(self, args):
         pilaOperadores.pop()
         initAddress = dirFunc[currFuncCall]['start']
@@ -193,6 +211,7 @@ class Tables(Transformer):
         return ('fin_llamada', args)
 
     # Clean up the function by restarting all virtual memory addresses
+    # Generates END FUNCTION Quadruple
     def func(self, args):
         global dvil, dvfl, dvcl, dvbl, dvilt, dvflt, dvclt, dvblt
         dvil = 10000
@@ -223,9 +242,9 @@ class Tables(Transformer):
         dirFunc[currFunc]['tempCount'] = tempCount
         del dirFunc[currFunc]['vars']
         resetTempCount()
-
         return Tree('func', args)
 
+    # Declares parameter variable in local functions directory
     def param_name(self, args):
         global dirFunc
         global currFunc
@@ -239,23 +258,24 @@ class Tables(Transformer):
             varList[idName] = {0: dirV, 1: currType, 'size': 1, 'dim1': None}
             dirFunc[currFunc]['vars'] = varList
             dirFunc[currFunc]['params'] += currType[0]
-
         return Tree('param_name', args)
 
+    # Adds variable to variable count in function directory
     def dec_var(self, args):
         if currFunc != 'global':
             dirFunc[currFunc]['varsCount'] = getVarsCount(dirFunc[currFunc]['vars'])
-        
         return Tree('dec_var', args)
 
+    # Adds function to variable count in function directory
+    # Adds start Quadruple to current function
     def dec_func(self, args):
         if currFunc != 'global':
             dirFunc[currFunc]['varsCount'] = getVarsCount(dirFunc[currFunc]['vars'])
             quadCount = getCurrentQuadCount()
             dirFunc[currFunc]['start'] = quadCount
-        
         return Tree('dec_func', args)
 
+    # Adds start Quadruple and variable count to main function
     def principal(self, args):
         global currFunc
         currFunc = 'global'
@@ -264,16 +284,19 @@ class Tables(Transformer):
         dirFunc[currFunc]['varsCount'] = getVarsCount(dirFunc[currFunc]['vars'])
         return Tree('principal', args)
 
+    # Sets current type to global
     def tipo(self, args):
         global currType
         currType = args[0].value
         return Tree('tipo', args)
 
+    # Sets current type to global
     def t(self, args):
         global currType
         currType = args[0].value
         return Tree('t', args)
 
+    # Pushes type, address, size and dimensions to piles
     def var_id(self, args):
         var = args[0].value
         tipo = getTipo(var)
@@ -287,11 +310,13 @@ class Tables(Transformer):
             pilaDimensions.push((dim1, dim2))
         return Tree('var_id', args)
 
+    # Pops Operators and VarDims piles
     def var_dim(self, args):
         pilaOperadores.pop()
         pilaVarDim.pop()
         return Tree('var_dim', args)
     
+    # Sets current variable to global and pushes current variable dimensions to pile
     def var_dim_id(self, args):
         global currVar
         global pilaVarDim
@@ -300,6 +325,7 @@ class Tables(Transformer):
         pilaOperadores.push("[")
         return Tree('var_dim_id', args)
 
+    # Handles expresions in dimensional variable indexing
     def dimn(self, args):
         global currDim
         global currFunc
@@ -328,7 +354,6 @@ class Tables(Transformer):
                 pilaTipos.push(tipoBase)
                 pilaOperadores.push('+')
                 generateQuad(currFunc, True)
-
         else:
             currDim = 0
             lim = getFromVar(var, 'dim2')
@@ -346,10 +371,9 @@ class Tables(Transformer):
             pilaTipos.push(tipoBase)
             pilaOperadores.push('+')
             generateQuad(currFunc, True)
-
-        
         return Tree('dimn', args)
 
+    # Handles constant variables
     def number(self, args):
         global dvcte
 
@@ -369,6 +393,7 @@ class Tables(Transformer):
         pilaTipos.push(tipo)
         return Tree('number', args)
 
+    # Handles boolean variables
     def boolean(self, args):
         global dvtrue
         global dvfalse
@@ -383,26 +408,31 @@ class Tables(Transformer):
         pilaTipos.push('bool')
         return Tree('boolean', args)
 
+    # Handles '*'. Pushes operator to operators pile
     def producto(self, args):
         oper = args[0].value
         pilaOperadores.push(oper)
         return Tree('producto', args)
 
+    # Handles '+'. Pushes operator to operators pile
     def adicion(self, args):
         oper = args[0].value
         pilaOperadores.push(oper)
         return Tree('adicion', args)
 
+    # Handles '='. Pushes operator to operators pile
     def igual(self, args):
         oper = args[0].value
         pilaOperadores.push(oper)
         return Tree('igual', args)
 
+    # Handles '>=', '<=', '!=', '==', '>', '<'. Pushes operator to operators pile
     def op_comp(self, args):
         oper = args[0].value
         pilaOperadores.push(oper)
         return Tree('op_comp', args)
 
+    # Generates general Quadruple for '+', '-', '&', '||' operations
     def termino(self, args):
         if pilaOperadores.size() > 0:    
             top = pilaOperadores.top()
@@ -423,6 +453,8 @@ class Tables(Transformer):
                     generateQuad(currFunc)
         return Tree('termino', args)
 
+    # Generates general Quadruple for '*', '/' operations
+    # Generates Matrix Operations Quadruple for '¡', '?', '$' matrix operations
     def factor(self, args):
         if pilaOperadores.size() > 0: 
             top = pilaOperadores.top()
@@ -440,6 +472,7 @@ class Tables(Transformer):
                     raise RuntimeError(f'Uncompatible sizes {dims} vs 1')
                 else:
                     generateQuad(currFunc)
+            # Inverse and Transpose
             elif top == "¡" or top == "?":
                 if pilaDimensions.size() > 0:
                     rightDims = pilaDimensions.pop()
@@ -450,6 +483,7 @@ class Tables(Transformer):
                         pilaDimensions.push(rightDims)
                 else:
                     raise RuntimeError(f'Can`t apply {top} if it`s not a matrix')
+            # Determinant
             elif top == "$":
                 if pilaDimensions.size() > 0:
                     rightDims = pilaDimensions.pop()
@@ -461,6 +495,7 @@ class Tables(Transformer):
                     raise RuntimeError(f'Can`t apply {top} if it`s not a matrix')
         return Tree('factor', args)
 
+    # Generates general Quadruple for '>=', '<=', '!=', '==', '>', '<' operations
     def full_exp_comp(self, args):
         if pilaOperadores.size() > 0:
             top = pilaOperadores.top()
@@ -471,6 +506,7 @@ class Tables(Transformer):
                     generateQuad(currFunc)
         return Tree('full_exp_comp', args)
 
+    # Generates ASSIGNMENT Quadruple
     def fin_asignacion(self, args):
         if pilaOperadores.size() > 0:
             top = pilaOperadores.top()
@@ -494,15 +530,18 @@ class Tables(Transformer):
                     pilaTipos.pop()
         return Tree('fin_asignacion', args)
 
+    # Pushes open parentesis to operator pile
     def open_par(self, args):
         oper = args[0].value
         pilaOperadores.push(oper)
         return Tree('open_par', args)
 
+    # Pushes closed parentesis to operator pile
     def close_par(self, args):
         pilaOperadores.pop()
         return Tree('close_par', args)
     
+    # Generates LEE VARIABLE Quadruple
     def lee_variable(self, args):
         global quadCount
         var = args[0].value
@@ -514,6 +553,7 @@ class Tables(Transformer):
             generateLeeVariableQuad(varDir)
         return Tree('lee_variable', args)
 
+    # Generate SALIDA Quadruple
     def string_salida(self, args):
         var = args[0].value
         pilaVariables.push(var.replace('"', ''))
@@ -521,6 +561,7 @@ class Tables(Transformer):
         generateSalidaQuad()
         return Tree('string_salida', args)
 
+    # Generate SALIDA Quadruple
     def expresion_salida(self, args):
         if pilaDimensions.size() > 0:
             raise RuntimeError('Can`t apply "escribe" to whole arrays')
@@ -528,10 +569,12 @@ class Tables(Transformer):
             generateSalidaQuad()
         return Tree('expresion_salida', args)
 
+    # Generate NEW LINE Quadruple for ESCRIBE
     def escritura(self, args):
         generateNewLineQuad()
         return Tree('escritura', args)
 
+    # Generate RETORNO Quadruple
     def retorno_expresion(self, args):
         global currFunc
         currFuncVar = dirFunc['global']['vars'][currFunc][0]
@@ -541,6 +584,7 @@ class Tables(Transformer):
             generateRetornoExp(currFuncVar)
         return Tree('retorno_expresion', args)
 
+    # Generate DECISION Quadruple
     def decision_exp(self, args):
         if pilaTipos.top() == "bool":
             generateDecisionQuad()
@@ -549,6 +593,7 @@ class Tables(Transformer):
 
         return Tree('decision_exp', args)
 
+    # Generate SINO Quadruple
     def sino(self, args):
         generateSinoQuad()
         return Tree('sino', args)
@@ -584,7 +629,6 @@ class Tables(Transformer):
         varType = getTipo(idName)
         pilaVariables.push(var)
         pilaTipos.push(varType)
-
         return Tree('variable_desde', args)
 
     def asignacion_desde_fin(self, args):
