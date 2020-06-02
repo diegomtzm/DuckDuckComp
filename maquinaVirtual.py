@@ -38,6 +38,9 @@ class MaquinaVirtual:
     self.paramsCount = [0,0,0,0]
     self.inParams = False
 
+  # Checks if pointer, returns the pointed memory
+  # @param: dirV
+  # return: virtual memory address
   def checkPointer(self, dirV):
     if dirV >= 70000:
       memoria, dirOffset, _ = self.getMemory(dirV)
@@ -136,7 +139,6 @@ class MaquinaVirtual:
       for i in range(0,size):
         valor = memoriaL[dirOffsetL+i]
         memoriaR[dirOffsetR+i] = valor
-
     # case '<=', '>=', '>', '<', '!=', '==', '&', '||'
     elif codigoOp == 6 or codigoOp == 7 or codigoOp == 8 or codigoOp == 9 \
       or codigoOp == 10 or codigoOp == 11 or codigoOp == 12 or codigoOp == 13:
@@ -152,6 +154,7 @@ class MaquinaVirtual:
       rightOp = self.checkPointer(self.quadruples[self.IP].rightOp)
       memoria, dirOffset, tipoR = self.getMemory(rightOp, mem)
       valorRight = memoria[dirOffset]
+      # Compares the left and right operators
       compRes = compOps[codigoOp](tipoL(valorLeft), tipoR(valorRight))
       res = self.quadruples[self.IP].res
       memoria, dirOffset, _ = self.getMemory(res, mem)
@@ -167,6 +170,7 @@ class MaquinaVirtual:
       leftOp = self.quadruples[self.IP].leftOp
       rightOp = self.quadruples[self.IP].rightOp
       res = self.quadruples[self.IP].res
+      # Checks if dimensional variable, assigns dimensions and size
       if type(leftOp) == tuple and type(rightOp) == tuple:
         dirVLeft = leftOp[0]
         leftDims = leftOp[1]
@@ -184,11 +188,13 @@ class MaquinaVirtual:
         dirVRight = self.checkPointer(rightOp)
         dirV = res
         size = 1
+
       memoriaRes, dirOffsetRes, _ = self.getMemory(dirV, mem)
       memoriaL, dirOffsetL, tipoL = self.getMemory(dirVLeft, mem) 
       memoriaR, dirOffsetR, tipoR = self.getMemory(dirVRight, mem)
 
       res = [None] * size
+      # Matrix multiplication
       if codigoOp == 3 and type(leftOp) == tuple and type(rightOp) == tuple:
         leftSize = leftDims[0] * leftDims[1]
         leftTemp = [None] * leftSize
@@ -206,17 +212,15 @@ class MaquinaVirtual:
 
         matrixRes = np.dot(leftMatrix, rightMatrix)
         res = matrixRes.A1
-
       else:
         for i in range(0, size):
           valorLeft = memoriaL[dirOffsetL+i]
           valorRight = memoriaR[dirOffsetR+i]
           arithmeticRes = arithmeticOps[codigoOp](tipoL(valorLeft), tipoR(valorRight))
           res[i] = arithmeticRes
-
+      # Assigns results
       for i in range(0, size):
         memoriaRes[dirOffsetRes+i] = res[i]
-
     # case 'lee'
     elif codigoOp == 14:
       res = self.checkPointer(self.quadruples[self.IP].res)

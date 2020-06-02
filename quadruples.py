@@ -30,6 +30,11 @@ class Quadruple:
     quad = [self.op, self.leftOp, self.rightOp, self.res]
     return quad
 
+# Generates a general quadruple with the specified current function
+# size and whether it's a pointer or not.
+# @param: currFunc, the current function
+# @param: pointer, if it's a pointer or not
+# @param: size, dimension of the variable 
 def generateQuad(currFunc, pointer=False, size=1):
     rightOp = pilaVariables.pop()
     rightType = pilaTipos.pop()
@@ -56,6 +61,7 @@ def generateQuad(currFunc, pointer=False, size=1):
             pTempCount += 1
         else:
             dirVTemp = getNewDirV(result_type, scope)
+
         codigoOper = tablaOperadores[oper]
 
         if size > 1:
@@ -67,6 +73,7 @@ def generateQuad(currFunc, pointer=False, size=1):
         quad = Quadruple(codigoOper, leftOp, rightOp, dirVTemp)
         cuadruplos.append(quad)
         pilaTipos.push(result_type)
+        # Count of temporal variable types
         if result_type == 'int':
             iTempCount += size
         elif result_type == 'float':
@@ -79,6 +86,10 @@ def generateQuad(currFunc, pointer=False, size=1):
     else:
         raise TypeError(f'Can`t apply {oper} to {leftType} and {rightType}')
 
+# Generates quadruple for matrix multiplication
+# @param: currFunc, the current function
+# @param: leftDims, dimensions of left matrix
+# @param: rightDims, dimensions of right matrix
 def generateMatMulQuad(currFunc, leftDims, rightDims):
     rightOp = pilaVariables.pop()
     rightType = pilaTipos.pop()
@@ -120,6 +131,9 @@ def generateMatMulQuad(currFunc, leftDims, rightDims):
     else:
         raise TypeError(f'Can`t apply {oper} to {leftType} and {rightType}')
 
+# Generates quadruple for matrix operations
+# @param: dims, dimensions of the resulting matrix
+# @param: currFunc, the current function
 def generateOpMatQuad(dims, currFunc):
     global quadCount
     global cuadruplos
@@ -152,6 +166,8 @@ def generateOpMatQuad(dims, currFunc):
     else:
         raise TypeError(f'Can`t apply {oper} to {varType}')
 
+# Generates ASSIGNMENT quadruple
+# @param: size, size of the resul
 def generateAssigmentQuad(size=1):
     res = pilaVariables.pop()
     resType = pilaTipos.pop()
@@ -170,6 +186,7 @@ def generateAssigmentQuad(size=1):
     else:
         raise TypeError(f'Can`t apply {oper} to {varType} and {resType}')
 
+# Generates GOTO quadruple
 def generateDecisionQuad():
     global quadCount
     res = pilaVariables.pop()
@@ -179,7 +196,8 @@ def generateDecisionQuad():
     cuadruplos.append(quad)
     quadCount += 1
     pilaSaltos.push(quadCount - 1)
-    
+
+# Generates GOTO quadruple for 'if else' statement
 def generateSinoQuad():
     global quadCount
     codigoOp = tablaOperadores['goTo']
@@ -190,6 +208,9 @@ def generateSinoQuad():
     pilaSaltos.push(quadCount - 1)
     rellenarQuad(numQuad)
 
+# Generates GOTO quadruple
+# @param: returnJump, the quadruple number to which the quadruple
+# will jump to when called.
 def generateGoToQuad(returnJump):
     global quadCount
     codigoOp = tablaOperadores['goTo']
@@ -197,16 +218,23 @@ def generateGoToQuad(returnJump):
     cuadruplos.append(quad)
     quadCount += 1
 
+# Sets the res of GOTO quadruples to the current quadruple number
+# @param: numQuad, the quadruple number to be modified
 def rellenarQuad(numQuad):
     global quadCount
     cuad = cuadruplos[numQuad]
     cuad.res = quadCount
     cuadruplos[numQuad] = cuad
 
+# Pushes current quadruple number to the jump pile
+# @param: n, the offset to the quadruple number
 def pushJump(n=0):
     global quadCount
     pilaSaltos.push(quadCount+n)
 
+# Handles 'for loop' statement, compares the current variable
+# with the defined limit in a 'smaller or equal than' way (<=)
+# @param: currFunc, the current function
 def generateDesdeQuad(currFunc):
     res = pilaVariables.pop()
     resType = pilaTipos.pop()
@@ -247,6 +275,11 @@ def generateDesdeQuad(currFunc):
     else:
         raise TypeError(f'Cannot apply <= to {varType} and {resType}')
 
+# Handles the 'for loop' statement, adds 1 to the current variable and
+# assigns it.
+# @param: currFunc, the current function
+# @param: right, the constant's virtual memory address
+# @param: rightType, the type of the constant variable
 def generateDesdeFinQuad(currFunc, right, rightType):
     var = pilaVariables.pop()
     varType = pilaTipos.pop()
@@ -276,6 +309,8 @@ def generateDesdeFinQuad(currFunc, right, rightType):
     else:
         raise TypeError(f'Cannot apply + to {varType} and {rightType}')
 
+# Generates LEE quadruple
+# @param: varDir, the virtual memory address of the variable to read
 def generateLeeVariableQuad(varDir):
     global quadCount
     codigoOp = tablaOperadores['lee']
@@ -283,6 +318,7 @@ def generateLeeVariableQuad(varDir):
     cuadruplos.append(quad)
     quadCount += 1
 
+# Generates ESCRIBE quadruple, prints the variable's value in console
 def generateSalidaQuad():
     global quadCount
     var = pilaVariables.pop()
@@ -292,6 +328,8 @@ def generateSalidaQuad():
     cuadruplos.append(quad)
     quadCount += 1
 
+# Generates new line quadruple for ESCRIBE, gives the instruction to
+# print a new line in console
 def generateNewLineQuad():
     global quadCount
     codigoOp = tablaOperadores['escribe']
@@ -299,6 +337,8 @@ def generateNewLineQuad():
     cuadruplos.append(quad)
     quadCount += 1
 
+# Generates RETURN quadruple, gives the instruction to return and assign
+# the value of the specified virtual memory address
 def generateRetornoExp(currFuncVar):
     global quadCount
     var = pilaVariables.pop()
@@ -308,6 +348,7 @@ def generateRetornoExp(currFuncVar):
     cuadruplos.append(quad)
     quadCount += 1
 
+# Generates END FUNC quadruple, specifies the end of the function
 def generateEndFuncQuad():
     global quadCount
     codigoOp = tablaOperadores['endFunc']
@@ -315,6 +356,7 @@ def generateEndFuncQuad():
     cuadruplos.append(quad)
     quadCount += 1
 
+# Generates END quadruple, specifies the end of the program
 def generateEndQuad():
     global quadCount
     codigoOp = tablaOperadores['end']
@@ -322,6 +364,10 @@ def generateEndQuad():
     cuadruplos.append(quad)
     quadCount += 1
 
+# Generates ERA quadruple, calls for required virtual memory 
+# for the specfied function to call
+# @param: funcName, function name to call for memory
+# @param: params, amount of parameters for the function 
 def generateERAQuad(funcName, params):
     global quadCount
     global paramCount
@@ -335,6 +381,8 @@ def generateERAQuad(funcName, params):
     paramCount = 0
     currFuncCall = funcName
 
+# Generates PARAM quadruple, sends variable for parameter to 
+# the specified function called and number of current parameter
 def generateParamQuad():
     global quadCount
     global paramCount
@@ -352,6 +400,9 @@ def generateParamQuad():
     else:
         raise Exception(f'Expected {paramCount} params and received {len(currParams)+1}')
 
+# Generates GO SUB quadruple, sends current function called and the initial
+# virtual memory address of the called function
+# @param: initAddress, initial virtual memory address of the called function
 def generateGoSubQuad(initAddress):
     global quadCount
     global paramCount
@@ -363,6 +414,11 @@ def generateGoSubQuad(initAddress):
     else:
         raise Exception(f'Expected {len(currParams)} params and received {paramCount}')
 
+# Generates FUNC ASSIGNMENT quadruple, assigns the called function return 
+# value to a temporal variable
+# @param: dirV, the virtual memory address from the called function
+# @param: result_type, the type of the result
+# @param: currFunc, the current function
 def generateFuncAssignmentQuad(dirV, result_type, currFunc):
     global quadCount
     global cuadruplos
@@ -390,6 +446,8 @@ def generateFuncAssignmentQuad(dirV, result_type, currFunc):
     elif result_type == 'bool':
         bTempCount += 1
 
+# Generates VER quadruple, checks if the index from the dimensional 
+# variable is within the limits of its dimensions
 def generateVerQuad(lim):
     global quadCount
     global cuadruplos
@@ -399,11 +457,12 @@ def generateVerQuad(lim):
     cuadruplos.append(quad)
     quadCount += 1
 
-    
+# Auxiliary function to get the current quadruple count
 def getCurrentQuadCount():
     global quadCount
     return quadCount
 
+# Auxiliary function to get the current temporal variables count
 def getTempCount():
     global iTempCount
     global fTempCount
@@ -413,6 +472,7 @@ def getTempCount():
     tempCount = [iTempCount, fTempCount, cTempCount, bTempCount, pTempCount]
     return tempCount
 
+# Auxiliary function to reset the temporal variables count
 def resetTempCount():
     global iTempCount
     global fTempCount

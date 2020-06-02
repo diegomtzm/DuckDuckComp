@@ -598,14 +598,17 @@ class Tables(Transformer):
         generateSinoQuad()
         return Tree('sino', args)
 
+    # Sets the quadruple number for goTo
     def decision(self, args):
         end = pilaSaltos.pop()
         rellenarQuad(end)
         return Tree('decision', args)
 
+    # Pushes to jump pile
     def mientras(self, args):
         pushJump()
 
+    # Generates DECISION Quadruple
     def haz(self, args):
         if pilaTipos.top() == "bool":
             generateDecisionQuad()
@@ -613,6 +616,7 @@ class Tables(Transformer):
             raise TypeError("Expected bool result")
         return Tree('haz', args)
 
+    # Generates GOTO Quadruple
     def mientras_bloque(self, args):
         end = pilaSaltos.pop()
         returnJump = pilaSaltos.pop()
@@ -620,6 +624,7 @@ class Tables(Transformer):
         rellenarQuad(end)
         return Tree('mientras_bloque', args)
 
+    # Pushes variable of FOR to variable and type piles
     def variable_desde(self, args):
         global dirFunc
         global currFunc
@@ -631,6 +636,7 @@ class Tables(Transformer):
         pilaTipos.push(varType)
         return Tree('variable_desde', args)
 
+    # Generates ASSIGNMENT Quadruple of FOR (i = 0)
     def asignacion_desde_fin(self, args):
         if pilaOperadores.size() > 0:
             top = pilaOperadores.top()
@@ -638,6 +644,7 @@ class Tables(Transformer):
                 generateAssigmentQuad()
         return Tree('asignacion_desde_fin', args)
 
+    # Generates DESDE and DECISION Quadruple of FOR
     def hacer(self, args):
         pushJump(0)
         generateDesdeQuad(currFunc)
@@ -647,6 +654,7 @@ class Tables(Transformer):
             raise TypeError("Expected bool result")
         return Tree('hacer', args)
 
+    # Generates DESDE FIN and GOTO Quadruples of FOR BLOCK
     def desde_bloque(self, args):
         end = pilaSaltos.pop()
         returnJump = pilaSaltos.pop()
@@ -657,17 +665,20 @@ class Tables(Transformer):
         rellenarQuad(end)
         return Tree('desde_bloque', args)
 
+    # Pushes logic operators
     def oplogic(self, args):
         global currFunc
         op = args[0].value
         pilaOperadores.push(op)
         return Tree('op3', args)
 
+    # Pushes matrix operators
     def op_mat(self, args):
         op = args[0].value
         pilaOperadores.push(op)
         return Tree('op_mat', args)
 
+    # Handles and pushes chars
     def char(self, args):
         global dvcte
         char = args[0].value
