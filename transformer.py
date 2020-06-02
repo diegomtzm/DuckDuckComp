@@ -368,9 +368,9 @@ class Tables(Transformer):
                     tablaCtesDir[dvcte] = dirBase
                     dvcte += 1
                 pilaVariables.push(tablaCtes[dirBase])
-                pilaTipos.push(tipoBase)
+                pilaTipos.push('int')
                 pilaOperadores.push('+')
-                generateQuad(currFunc, True)
+                generateQuad(currFunc, True, tipo=tipoBase)
         else:
             currDim = 0
             lim = getFromVar(var, 'dim2')
@@ -385,9 +385,9 @@ class Tables(Transformer):
                 tablaCtesDir[dvcte] = dirBase
                 dvcte += 1
             pilaVariables.push(tablaCtes[dirBase])
-            pilaTipos.push(tipoBase)
+            pilaTipos.push('int')
             pilaOperadores.push('+')
-            generateQuad(currFunc, True)
+            generateQuad(currFunc, True, tipo=tipoBase)
         return Tree('dimn', args)
 
     # Handles constant variables

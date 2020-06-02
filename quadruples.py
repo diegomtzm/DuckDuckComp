@@ -35,7 +35,7 @@ class Quadruple:
 # @param: currFunc, the current function
 # @param: pointer, if it's a pointer or not
 # @param: size, dimension of the variable 
-def generateQuad(currFunc, pointer=False, size=1):
+def generateQuad(currFunc, pointer=False, size=1, tipo=None):
     rightOp = pilaVariables.pop()
     rightType = pilaTipos.pop()
     leftOp = pilaVariables.pop()
@@ -59,8 +59,10 @@ def generateQuad(currFunc, pointer=False, size=1):
         if pointer:
             dirVTemp = getNewDirV('pointer', scope)
             pTempCount += 1
+            tipoTemp = tipo
         else:
             dirVTemp = getNewDirV(result_type, scope)
+            tipoTemp = result_type
 
         codigoOper = tablaOperadores[oper]
 
@@ -72,7 +74,7 @@ def generateQuad(currFunc, pointer=False, size=1):
 
         quad = Quadruple(codigoOper, leftOp, rightOp, dirVTemp)
         cuadruplos.append(quad)
-        pilaTipos.push(result_type)
+        pilaTipos.push(tipoTemp)
         # Count of temporal variable types
         if result_type == 'int':
             iTempCount += size
