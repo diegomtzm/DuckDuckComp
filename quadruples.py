@@ -339,6 +339,7 @@ def generateNewLineQuad():
 
 # Generates RETURN quadruple, gives the instruction to return and assign
 # the value of the specified virtual memory address
+# @param: currFuncVar, the current function variables
 def generateRetornoExp(currFuncVar):
     global quadCount
     var = pilaVariables.pop()
@@ -448,6 +449,7 @@ def generateFuncAssignmentQuad(dirV, result_type, currFunc):
 
 # Generates VER quadruple, checks if the index from the dimensional 
 # variable is within the limits of its dimensions
+# @param: lim, limit of the dimensional variable
 def generateVerQuad(lim):
     global quadCount
     global cuadruplos
