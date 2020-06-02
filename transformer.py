@@ -76,6 +76,20 @@ class Tables(Transformer):
         dirFunc[currFunc]['tempCount'] = tempCount
         del dirFunc[currFunc]['vars']
         resetTempCount()
+        # print("\nDirectorio de funciones:\n")
+        # pprint(dirFunc)
+        # print("\nTabla de constantes:\n")
+        # print(tablaCtes)
+        # print("\nTabla de dir de constantes:\n")
+        # print(tablaCtesDir)
+        # print("\nTabla de operadores:\n")
+        # print(tablaOperadores)
+        # print("\nPila Variables:\n")
+        # print(pilaVariables.get())
+        # print("\nPila Tipos:\n")
+        # print(pilaTipos.get())
+        # print("\nPila Operadores:\n")
+        # print(pilaOperadores.get())
         print("\nCuadruplos:\n")
         i = 1
         for c in cuadruplos:

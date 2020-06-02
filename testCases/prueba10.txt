@@ -1,0 +1,32 @@
+%% Selection Sort
+Programa SelectionSort;
+var int array[5], x;
+
+funcion void selectionSort(int n):
+var int i, j, minIdx, temp;
+{
+  desde i = 0 hasta n-2 hacer {
+    minIdx = i;
+    desde j = i+1 hasta n-1 hacer {
+      si ((array[j] < array[minIdx])) entonces {
+        minIdx = j;
+      }
+    }
+    temp = array[i];
+    array[i] = array[minIdx];
+    array[minIdx] = temp;
+  }
+}
+
+principal() {
+  array[0] = 64;
+  array[1] = 25;
+  array[2] = 12;
+  array[3] = 22;
+  array[4] = 11;
+  selectionSort(5);
+
+  desde x = 0 hasta 4 hacer {
+    escribe(array[x]);
+  }
+}

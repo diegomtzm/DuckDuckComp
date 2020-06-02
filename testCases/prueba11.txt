@@ -1,0 +1,26 @@
+%% Find, regresa el index del valor si es que se encuentra
+%% sino, regresa -1
+Programa find;
+var int array[5], x;
+
+funcion int find(int res, int n):
+var int i;
+{
+  desde i = 0 hasta n-1 hacer {
+    si ((array[i] == res)) entonces {
+      regresa(i);
+    }
+  }
+  regresa(-1);
+}
+
+principal() {
+  array[0] = 64;
+  array[1] = 25;
+  array[2] = 12;
+  array[3] = 22;
+  array[4] = 11;
+
+  escribe(find(12, 5));
+  escribe(find(13, 5));
+}
