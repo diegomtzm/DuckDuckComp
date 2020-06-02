@@ -238,6 +238,8 @@ class Tables(Transformer):
         dvclt = 62000
         dvblt = 64000
 
+        dvpl = 72000
+
         dirVirtual['local'] = {
             'int': dvil,
             'float': dvfl,
@@ -248,7 +250,8 @@ class Tables(Transformer):
             'int': dvilt,
             'float': dvflt,
             'char': dvclt,
-            'bool': dvblt
+            'bool': dvblt,
+            'pointer': dvpl
         }
 
         generateEndFuncQuad()
@@ -557,15 +560,32 @@ class Tables(Transformer):
     
     # Generates LEE VARIABLE Quadruple
     def lee_variable(self, args):
-        global quadCount
+        generateLeeVariableQuad()
+        return Tree('lee_variable', args)
+
+    def var_id_lee(self, args):
         var = args[0].value
         varDir = getDirV(var, 'variable')
-        size = getFromVar(var, 'size')
-        if size > 1:
-            raise RuntimeError('Can`t apply "lee" to whole arrays')
-        else:
-            generateLeeVariableQuad(varDir)
-        return Tree('lee_variable', args)
+        varType = getTipo(var)
+        pilaVariables.push(varDir)
+        pilaTipos.push(varType)
+        return Tree('var_id_lee', args)
+
+    # Pops Operators and VarDims piles
+    def var_dim_lee(self, args):
+        pilaOperadores.pop()
+        pilaVarDim.pop()
+        return Tree('var_dim_lee', args)
+    
+    # Sets current variable to global and pushes current variable dimensions to pile
+    def var_dim_id_lee(self, args):
+        global currVar
+        global pilaVarDim
+        currVar = args[0].value
+        print(f'currVar: {currVar}')
+        pilaVarDim.push(currVar)
+        pilaOperadores.push("[")
+        return Tree('var_dim_id_lee', args)
 
     # Generate SALIDA Quadruple
     def string_salida(self, args):

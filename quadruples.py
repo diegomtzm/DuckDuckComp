@@ -313,8 +313,10 @@ def generateDesdeFinQuad(currFunc, right, rightType):
 
 # Generates LEE quadruple
 # @param: varDir, the virtual memory address of the variable to read
-def generateLeeVariableQuad(varDir):
+def generateLeeVariableQuad():
     global quadCount
+    varDir = pilaVariables.pop()
+    pilaTipos.pop()
     codigoOp = tablaOperadores['lee']
     quad = Quadruple(codigoOp, None, None, varDir)
     cuadruplos.append(quad)

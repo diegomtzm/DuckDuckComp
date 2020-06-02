@@ -58,7 +58,11 @@ ld_grammar = r"""
   lectura: LEE "(" lista_vars ")" ";"
   lista_vars: lee_variable "," lista_vars
       | lee_variable
-  lee_variable: ID dimn? dimn?
+  lee_variable: var_dim_lee
+          | var_id_lee
+  var_dim_lee: var_dim_id_lee dimn dimn?
+  var_dim_id_lee: ID
+  var_id_lee: ID
   escritura: ESCRIBE "(" salida ")" ";"
   salida: string_salida salida2?
       | expresion_salida salida2?
