@@ -124,6 +124,7 @@ def generateMatMulQuad(currFunc, leftDims, rightDims):
         pilaTipos.push(result_type)
 
         size = leftDims[0] * rightDims[1]
+        dirOffset(result_type, scope, size)
         if result_type == 'int':
             iTempCount += size
         elif result_type == 'float':
@@ -159,6 +160,7 @@ def generateOpMatQuad(dims, currFunc):
             size = 1
         else:
             size = dims[0] * dims[1]
+            dirOffset(result_type, scope, size)
         if result_type == 'int':
             iTempCount += size
         elif result_type == 'float':
