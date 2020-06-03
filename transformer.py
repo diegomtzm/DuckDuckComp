@@ -71,7 +71,7 @@ class Tables(Transformer):
     # Prints the function directory for testing purposes
     # Main program and execute of virtual machine
     def programa(self, args):
-        generateEndQuad()
+        generateEndQuad('end')
         tempCount = getTempCount()
         dirFunc[currFunc]['tempCount'] = tempCount
         del dirFunc[currFunc]['vars']
@@ -190,7 +190,7 @@ class Tables(Transformer):
                 dirFunc['global']['vars'][currFunc] = {0: dirV, 1: currType, 'size': 1, 'dim1': None}
         return Tree('func_name', args)
     
-    # Sets current function call to global
+    # Sets global current function
     def llamada_name(self, args):
         global currFuncCall
         currFuncCall = args[0].value
@@ -215,6 +215,7 @@ class Tables(Transformer):
 
     # Generates GOSUB Quadruple and FUNCTION ASSIGNMENT Quadruple
     def fin_llamada(self, args):
+        # Removes false wall
         pilaOperadores.pop()
         initAddress = dirFunc[currFuncCall]['start']
         generateGoSubQuad(initAddress)
@@ -254,7 +255,7 @@ class Tables(Transformer):
             'pointer': dvpl
         }
 
-        generateEndFuncQuad()
+        generateEndQuad('endFunc')
         tempCount = getTempCount()
         dirFunc[currFunc]['tempCount'] = tempCount
         del dirFunc[currFunc]['vars']
@@ -333,7 +334,7 @@ class Tables(Transformer):
         pilaVarDim.pop()
         return Tree('var_dim', args)
     
-    # Sets current variable to global and pushes current variable dimensions to pile
+    # Sets global current variable and pushes current variable to dimensional variables pile
     def var_dim_id(self, args):
         global currVar
         global pilaVarDim
@@ -449,11 +450,22 @@ class Tables(Transformer):
         pilaOperadores.push(oper)
         return Tree('op_comp', args)
 
-    # Generates general Quadruple for '+', '-', '&', '||' operations
+     # Generates general Quadruple for '&', '||' operations
+    def exp_logica(self, args):
+        if pilaOperadores.size() > 0:    
+            top = pilaOperadores.top()
+            if top in ["&", "||"]:
+                if pilaDimensions.size() > 0:
+                    raise RuntimeError(f'Can`t apply {top} to arrays')
+                else:
+                    generateQuad(currFunc)
+        return Tree('exp_logica', args)
+
+    # Generates general Quadruple for '+', '-' operations
     def termino(self, args):
         if pilaOperadores.size() > 0:    
             top = pilaOperadores.top()
-            if top in ["+", "-", "&", "||"]:
+            if top in ["+", "-"]:
                 if pilaDimensions.size() > 1:
                     rightDims = pilaDimensions.pop()
                     leftDims = pilaDimensions.pop()
@@ -516,7 +528,7 @@ class Tables(Transformer):
     def full_exp_comp(self, args):
         if pilaOperadores.size() > 0:
             top = pilaOperadores.top()
-            if top in [">", "<", "<=", ">=", "!=", "==", "&", "||"]:
+            if top in [">", "<", "<=", ">=", "!=", "=="]:
                 if pilaDimensions.size() > 0:
                     raise RuntimeError(f'Can`t apply {top} to arrays')
                 else:
@@ -582,7 +594,6 @@ class Tables(Transformer):
         global currVar
         global pilaVarDim
         currVar = args[0].value
-        print(f'currVar: {currVar}')
         pilaVarDim.push(currVar)
         pilaOperadores.push("[")
         return Tree('var_dim_id_lee', args)
@@ -662,7 +673,6 @@ class Tables(Transformer):
     def variable_desde(self, args):
         global dirFunc
         global currFunc
-        varList = dirFunc[currFunc]['vars']
         idName = args[0].value
         var = getDirV(idName, 'variable')
         varType = getTipo(idName)
@@ -680,7 +690,7 @@ class Tables(Transformer):
 
     # Generates DESDE and DECISION Quadruple of FOR
     def hacer(self, args):
-        pushJump(0)
+        pushJump()
         generateDesdeQuad(currFunc)
         if pilaTipos.top() == "bool":
             generateDecisionQuad()

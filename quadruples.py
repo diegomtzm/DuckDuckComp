@@ -35,6 +35,7 @@ class Quadruple:
 # @param: currFunc, the current function
 # @param: pointer, if it's a pointer or not
 # @param: size, dimension of the variable 
+# @param: tipo, the type of the pointed variable (only if pointer=true)
 def generateQuad(currFunc, pointer=False, size=1, tipo=None):
     rightOp = pilaVariables.pop()
     rightType = pilaTipos.pop()
@@ -194,7 +195,7 @@ def generateAssigmentQuad(size=1):
 def generateDecisionQuad():
     global quadCount
     res = pilaVariables.pop()
-    tipo = pilaTipos.pop()
+    pilaTipos.pop()
     codigoOp = tablaOperadores['goToF']
     quad = Quadruple(codigoOp, res, None, "")
     cuadruplos.append(quad)
@@ -231,10 +232,9 @@ def rellenarQuad(numQuad):
     cuadruplos[numQuad] = cuad
 
 # Pushes current quadruple number to the jump pile
-# @param: n, the offset to the quadruple number
-def pushJump(n=0):
+def pushJump():
     global quadCount
-    pilaSaltos.push(quadCount+n)
+    pilaSaltos.push(quadCount)
 
 # Handles 'for loop' statement, compares the current variable
 # with the defined limit in a 'smaller or equal than' way (<=)
@@ -248,9 +248,6 @@ def generateDesdeQuad(currFunc):
     
     if(result_type != 'ERROR'):
         global quadCount
-        global iTempCount
-        global fTempCount
-        global cTempCount
         global bTempCount
         global cuadruplos
 
@@ -267,14 +264,7 @@ def generateDesdeQuad(currFunc):
         pilaTipos.push(varType)
         pilaVariables.push(dirVTemp)
         pilaTipos.push(result_type)
-        if result_type == 'int':
-            iTempCount += 1
-        elif result_type == 'float':
-            fTempCount += 1
-        elif result_type == 'char':
-            cTempCount += 1
-        elif result_type == 'bool':
-            bTempCount += 1
+        bTempCount += 1
         quadCount += 1
     else:
         raise TypeError(f'Cannot apply <= to {varType} and {resType}')
@@ -328,7 +318,7 @@ def generateLeeVariableQuad():
 def generateSalidaQuad():
     global quadCount
     var = pilaVariables.pop()
-    varType = pilaTipos.pop()
+    pilaTipos.pop()
     codigoOp = tablaOperadores['escribe']
     quad = Quadruple(codigoOp, None, None, var)
     cuadruplos.append(quad)
@@ -345,28 +335,20 @@ def generateNewLineQuad():
 
 # Generates RETURN quadruple, gives the instruction to return and assign
 # the value of the specified virtual memory address
-# @param: currFuncVar, the current function variables
+# @param: currFuncVar, the current function variable address
 def generateRetornoExp(currFuncVar):
     global quadCount
     var = pilaVariables.pop()
-    varType = pilaTipos.pop()
+    pilaTipos.pop()
     codigoOp = tablaOperadores['regresa']
     quad = Quadruple(codigoOp, currFuncVar, None, var)
     cuadruplos.append(quad)
     quadCount += 1
 
-# Generates END FUNC quadruple, specifies the end of the function
-def generateEndFuncQuad():
+# Generates END and END FUNC quadruple, specifies the end of the program or function
+def generateEndQuad(oper):
     global quadCount
-    codigoOp = tablaOperadores['endFunc']
-    quad = Quadruple(codigoOp, None, None, None)
-    cuadruplos.append(quad)
-    quadCount += 1
-
-# Generates END quadruple, specifies the end of the program
-def generateEndQuad():
-    global quadCount
-    codigoOp = tablaOperadores['end']
+    codigoOp = tablaOperadores[oper]
     quad = Quadruple(codigoOp, None, None, None)
     cuadruplos.append(quad)
     quadCount += 1
@@ -409,7 +391,7 @@ def generateParamQuad():
 
 # Generates GO SUB quadruple, sends current function called and the initial
 # virtual memory address of the called function
-# @param: initAddress, initial virtual memory address of the called function
+# @param: initAddress, start quadruple of the called function
 def generateGoSubQuad(initAddress):
     global quadCount
     global paramCount
