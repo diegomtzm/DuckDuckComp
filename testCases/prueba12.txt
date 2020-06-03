@@ -1,3 +1,4 @@
+%% Prueba de las 3 operaciones especiales sobre matrices
 Programa prueba;
 var
   int i, j, A[2][2], B[2][2];
