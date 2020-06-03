@@ -1,4 +1,5 @@
 %% Fibonacci con ciclo y Fibonacci recursivo
+Programa fibonacci;
 var int i, res;
 
 funcion int fibonacci(int n):

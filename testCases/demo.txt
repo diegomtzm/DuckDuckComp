@@ -1,0 +1,74 @@
+Programa demo;
+var
+  int A[2][2], B[2][3], C[3][2], D[2][2];
+  int r, c;
+
+%% llena la matriz B con input del usuario
+funcion void llenaMatrizB():
+var int i, j;
+{
+  desde i = 0 hasta 1 hacer {
+    desde j = 0 hasta 2 hacer {
+      escribe("Teclee el valor", i, ",", j, "para B");
+      lee(B[i][j]);
+    }
+  }
+}
+
+%% llena la matriz C con una expresión
+funcion void llenaMatrizC():
+var int i, j;
+{
+  desde i = 0 hasta 2 hacer {
+    desde j = 0 hasta 1 hacer {
+      C[i][j] = i + j + 1;
+    }
+  }
+}
+
+%% imprime la matriz B
+funcion void escribeB():
+var int i;
+{
+  escribe("--------- B -----------");
+  desde i = 0 hasta 1 hacer {
+    escribe(B[i][0], B[i][1], B[i][2]);
+  }
+}
+
+%% imprime la matriz C
+funcion void escribeC():
+var int i;
+{
+  escribe("--------- C -----------");
+  desde i = 0 hasta 2 hacer {
+    escribe(C[i][0], C[i][1]);
+  }
+}
+
+principal() {
+  llenaMatrizB();
+  escribeB();
+
+  llenaMatrizC();
+  escribeC();
+
+  %% llena la matriz D casilla por casilla
+  D[0][0] = 4;
+  D[0][1] = 2;
+  D[1][0] = 7;
+  D[1][1] = 9;
+
+  escribe("----------- D ---------");
+  desde r = 0 hasta 1 hacer {
+    escribe(D[r][0], D[r][1]);
+  }
+
+  %% multiplica B * C y suma la transpuesta de D
+  A = B * C + D¡;
+
+  escribe("--------- B * C + D¡ -----------");
+  desde r = 0 hasta 1 hacer {
+    escribe(A[r][0], A[r][1]);
+  }
+}
